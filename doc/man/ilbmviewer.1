@@ -1,0 +1,73 @@
+.TH "ILBMVIEWER" "1" "January 2012" "ilbmviewer 0.1" "Command Reference"
+.SH "NAME"
+ilbmviewer \- View a collection of ILBM images inside an IFF file
+.SH "SYNOPSIS"
+\fBilbmviewer\fR [\fIoptions\fR] \fIfile.IFF\fR
+.SH "DESCRIPTION"
+.PP
+The command \fBilbmviewer\fR displays ILBM images stored inside an IFF file.
+.SH "FUNCTION KEYS"
+.PP
+While viewing ILBM images, the following function keys can be used:
+.PP
+\fBPAGE UP\fR
+.RS 4
+Displays the previous ILBM image inside the IFF file.
+.RE
+.PP
+\fBPAGE DOWN\fR, \fBSPACE\fR
+.RS 4
+Displays the next ILBM image inside the IFF file.
+.RE
+.PP
+\fBTAB\fR
+.RS 4
+Turns color cycling mode for Deluxe Paint and Graphicraft color ranges on or off
+.RE
+.PP
+\fBF\fR
+.RS 4
+Turns fullscreen mode on or off
+.RE
+.PP
+\fBUP\fR, \fBDOWN\fR, \fBLEFT\fR, \fBRIGHT\fR
+.RS 4
+Changes the horizontal or vertical display offset, if the window size is smaller than the actual image size
+.RE
+.PP
+\fBS\fR
+.RS 4
+Turns stretch mode on or off. Stretch mode tries to make the window size equal to the actual image size
+.RE
+.PP
+\fBESACPE\fR
+.RS 4
+Quits the viewer
+.RE
+.PP
+.SH "OPTIONS"
+.PP
+\fB\-\-colormode\fR
+.RS 4
+Specifies to which output format the ILBM image should be converted. Values can be
+\fBindex8\fR to use 8-bit chunky graphics, \fBrgb\fR to use 24-bit RGB graphics.
+\fBauto\fR can be used to automatically pick the most suitable option, which is
+used by default.
+.RE
+.PP
+\fB\-h\fR, \fB\-\-help\fR
+.RS 4
+Shows the usage of this command to the user
+.RE
+.PP
+.SH "AUTHOR"
+.PP
+\fBSander van der Burg\fR
+.br
+.RS 4
+Author
+.RE
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2012 Sander van der Burg
+.br
