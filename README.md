@@ -12,7 +12,7 @@ In order to build and use this package the following libraries are required:
 * `libiff`, in order to parse IFF files
 * `libilbm`, in order to understand ILBM application chunks, byte-run compression/decompression and to conveniently access ILBM image properties
 * `libamivideo`, in order to convert Amiga planar graphics data into RGB and to display special screen modes such as EHB and HAM
-* [SDL](http://www.libsdl.org), is used as a porability layer to handle input and graphics
+* [SDL](http://www.libsdl.org), is used as a portability layer to handle input and graphics
 
 Installation
 ============
