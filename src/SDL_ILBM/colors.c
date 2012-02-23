@@ -23,19 +23,33 @@
  */
 
 #include "colors.h"
+#include <math.h>
+#include <stdlib.h>
 #include <palette.h>
 #include <viewportmode.h>
 
 SDL_Color* SDL_ILBM_computeColors(const ILBM_Image *image, unsigned int *colorsLength)
 {
-    IFF_Long viewportMode;
-    
-    if(image->viewport == NULL)
-	viewportMode = 0;
-    else
-	viewportMode = image->viewport->viewportMode;
+    if(image->colorMap == NULL)
+    {
+	/* There is no colormap, so we initialize a default palette with 0 colors */
 	
-    return (SDL_Color*)amiVideo_computePalette((AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, viewportMode, colorsLength);
+	unsigned int i;
+	*colorsLength = (unsigned int)pow(2, image->bitMapHeader->nPlanes);
+	
+	return (SDL_Color*)calloc(*colorsLength, sizeof(SDL_Color));
+    }
+    else
+    {
+	IFF_Long viewportMode;
+    
+	if(image->viewport == NULL)
+	    viewportMode = 0;
+	else
+	    viewportMode = image->viewport->viewportMode;
+	
+	return (SDL_Color*)amiVideo_computePalette((AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, viewportMode, colorsLength);
+    }
 }
 
 SDL_ILBM_ColorMode SDL_ILBM_autoPickColorMode(const ILBM_Image *image, SDL_ILBM_ColorMode colorMode)
