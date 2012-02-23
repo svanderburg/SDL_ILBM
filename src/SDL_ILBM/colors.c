@@ -34,7 +34,6 @@ SDL_Color* SDL_ILBM_computeColors(const ILBM_Image *image, unsigned int *colorsL
     {
 	/* There is no colormap, so we initialize a default palette with 0 colors */
 	
-	unsigned int i;
 	*colorsLength = (unsigned int)pow(2, image->bitMapHeader->nPlanes);
 	
 	return (SDL_Color*)calloc(*colorsLength, sizeof(SDL_Color));
