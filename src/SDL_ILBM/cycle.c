@@ -75,12 +75,12 @@ static void shiftCycleInfo(SDL_Color *colors, const ILBM_CycleInfo *cycleInfo)
 
 static Uint32 computeColorRangeTime(const Uint32 ticks, const ILBM_ColorRange *colorRange)
 {
-    return 1000 / (60.0 * colorRange->rate / ILBM_COLORRANGE_MAX_ACTIVE_VALUE) + ticks;
+    return 1000 / (60.0 * colorRange->rate / ILBM_COLORRANGE_60_STEPS_PER_SECOND) + ticks;
 }
 
 static Uint32 computeDRangeTime(const Uint32 ticks, const ILBM_DRange *drange)
 {
-    return 1000 / (60.0 * drange->rate / ILBM_DRANGE_MAX_ACTIVE_VALUE) + ticks;
+    return 1000 / (60.0 * drange->rate / ILBM_DRANGE_60_STEPS_PER_SECOND) + ticks;
 }
 
 static Uint32 computeCycleInfoTime(const Uint32 ticks, const ILBM_CycleInfo *cycleInfo)
