@@ -26,6 +26,6 @@
 #define __SDL_ILBM_VIEWER_H
 #include "colors.h"
 
-int viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode);
+int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode);
 
 #endif

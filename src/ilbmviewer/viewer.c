@@ -32,7 +32,7 @@
 #include "image.h"
 #include "cycle.h"
 
-int viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode)
+int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode)
 {
     IFF_Chunk *chunk;
     ILBM_Image **images;

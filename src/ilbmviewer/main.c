@@ -75,5 +75,5 @@ int main(int argc, char *argv[])
 	return 1;
     }
     else
-	return viewILBMImage(argv[optind], colorMode);
+	return SDL_ILBM_viewILBMImage(argv[optind], colorMode);
 }
