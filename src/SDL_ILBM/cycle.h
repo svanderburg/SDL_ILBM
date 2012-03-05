@@ -28,7 +28,7 @@
 typedef struct SDL_ILBM_RangeTimes SDL_ILBM_RangeTimes;
 
 #include <SDL.h>
-#include <ilbmimage.h>
+#include <libilbm/ilbmimage.h>
 
 struct SDL_ILBM_RangeTimes
 {

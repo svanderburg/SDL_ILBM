@@ -26,7 +26,7 @@
 #define __SDL_ILBM_IMAGE_H
 
 #include <SDL.h>
-#include <ilbmimage.h>
+#include <libilbm/ilbmimage.h>
 
 SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, unsigned int colorsLength);
 

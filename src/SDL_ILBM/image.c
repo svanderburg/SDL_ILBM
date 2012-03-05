@@ -23,10 +23,10 @@
  */
 
 #include "image.h"
-#include <interleave.h>
-#include <byterun.h>
-#include <palette.h>
-#include <bitplane.h>
+#include <libilbm/interleave.h>
+#include <libilbm/byterun.h>
+#include <libamivideo/palette.h>
+#include <libamivideo/bitplane.h>
 #include "colors.h"
 
 SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, const unsigned int colorsLength)

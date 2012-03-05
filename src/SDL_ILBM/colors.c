@@ -25,8 +25,8 @@
 #include "colors.h"
 #include <math.h>
 #include <stdlib.h>
-#include <palette.h>
-#include <viewportmode.h>
+#include <libamivideo/palette.h>
+#include <libamivideo/viewportmode.h>
 
 SDL_Color* SDL_ILBM_computeColors(const ILBM_Image *image, unsigned int *colorsLength)
 {
@@ -42,11 +42,13 @@ SDL_Color* SDL_ILBM_computeColors(const ILBM_Image *image, unsigned int *colorsL
     {
 	IFF_Long viewportMode;
     
+	/* If no viewport value is set, assume 0 value */
 	if(image->viewport == NULL)
 	    viewportMode = 0;
 	else
 	    viewportMode = image->viewport->viewportMode;
 	
+	/* Compute the SDL palette */
 	return (SDL_Color*)amiVideo_computePalette((AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, viewportMode, colorsLength);
     }
 }

@@ -28,7 +28,7 @@
 typedef struct SDL_ILBM_Window SDL_ILBM_Window;
 
 #include <SDL.h>
-#include <ilbmimage.h>
+#include <libilbm/ilbmimage.h>
 
 struct SDL_ILBM_Window
 {

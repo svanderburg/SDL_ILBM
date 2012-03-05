@@ -25,9 +25,8 @@
 #include "viewer.h"
 #include <stdio.h>
 #include <SDL.h>
-#include <ilbm.h>
-#include <ilbmimage.h>
-#include <viewportmode.h>
+#include <libilbm/ilbm.h>
+#include <libilbm/ilbmimage.h>
 #include "window.h"
 #include "image.h"
 #include "cycle.h"

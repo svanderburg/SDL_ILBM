@@ -26,7 +26,7 @@
 #define __SDL_ILBM_COLORS_H
 
 #include <SDL.h>
-#include <ilbmimage.h>
+#include <libilbm/ilbmimage.h>
 
 typedef enum
 {
