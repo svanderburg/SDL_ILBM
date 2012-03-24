@@ -49,7 +49,7 @@ SDL_Color* SDL_ILBM_computeColors(const ILBM_Image *image, unsigned int *colorsL
 	    viewportMode = image->viewport->viewportMode;
 	
 	/* Compute the SDL palette */
-	return (SDL_Color*)amiVideo_computePalette((AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, viewportMode, colorsLength);
+	return (SDL_Color*)amiVideo_computePalette((AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, viewportMode, colorsLength);
     }
 }
 

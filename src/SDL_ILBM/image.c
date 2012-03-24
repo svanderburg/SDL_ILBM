@@ -106,7 +106,7 @@ SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image)
 	return NULL;
     }
     
-    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, (AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, image->viewport->viewportMode);
+    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, (AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
     
     rgbPixels = (Uint32*)malloc(image->bitMapHeader->w * image->bitMapHeader->h * sizeof(Uint32));
 	
