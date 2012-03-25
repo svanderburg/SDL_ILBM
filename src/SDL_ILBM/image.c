@@ -31,14 +31,11 @@
 
 SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, const unsigned int colorsLength)
 {
-    IFF_UByte *indexes;
     SDL_Surface *picture;
     AMI_UByte *indexPixels;
     
     /* Decompress the image body */
     ILBM_unpackByteRun(image);
-    
-    indexes = ILBM_deinterleave(image);
     
     picture = SDL_CreateRGBSurface(SDL_SWSURFACE, image->bitMapHeader->w, image->bitMapHeader->h, 8, 0, 0, 0, 0);
     
@@ -48,7 +45,22 @@ SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, 
 	return NULL;
     }
     
-    indexPixels = amiVideo_bitplanesToChunky(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes);
+    if(ILBM_imageIsPBM(image))
+    {
+	/* A PBM image is not interleaved and already in chunky format, so we just have to copy the stuff */
+	indexPixels = (AMI_UByte*)malloc(image->body->chunkSize * sizeof(AMI_UByte));
+	memcpy(indexPixels, image->body->chunkData, image->body->chunkSize);
+    }
+    else
+    {
+	/* Amiga ILBM image is interleaved. We have to deinterleave it in order to be able to convert it */
+	IFF_UByte *indexes = ILBM_deinterleave(image);
+	
+	/* For an amiga ILBM image, we have to convert bitplanes to chunky format */
+	indexPixels = amiVideo_bitplanesToChunky(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes);
+	
+	free(indexes);
+    }
     
     /* Attach pixels */
     
@@ -63,8 +75,6 @@ SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, 
     SDL_UnlockSurface(picture);
     
     SDL_SetPalette(picture, SDL_LOGPAL | SDL_PHYSPAL, colors, 0, colorsLength);
-    
-    free(indexes);
     
     return picture;
 }
