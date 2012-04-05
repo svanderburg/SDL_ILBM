@@ -32,7 +32,7 @@
 SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, const unsigned int colorsLength)
 {
     SDL_Surface *picture;
-    AMI_UByte *indexPixels;
+    amiVideo_UByte *indexPixels;
     
     /* Decompress the image body */
     ILBM_unpackByteRun(image);
@@ -48,7 +48,7 @@ SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, 
     if(ILBM_imageIsPBM(image))
     {
 	/* A PBM image is not interleaved and already in chunky format, so we just have to copy the stuff */
-	indexPixels = (AMI_UByte*)malloc(image->body->chunkSize * sizeof(AMI_UByte));
+	indexPixels = (amiVideo_UByte*)malloc(image->body->chunkSize * sizeof(amiVideo_UByte));
 	memcpy(indexPixels, image->body->chunkData, image->body->chunkSize);
     }
     else
@@ -99,7 +99,7 @@ SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image)
 {
     IFF_UByte *indexes;
     SDL_Surface *picture;
-    AMI_OutputColor *colorPixels;
+    amiVideo_OutputColor *colorPixels;
     Uint32 *rgbPixels;
     unsigned int i;
     
@@ -116,7 +116,7 @@ SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image)
 	return NULL;
     }
     
-    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, (AMI_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
+    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
     
     rgbPixels = (Uint32*)malloc(image->bitMapHeader->w * image->bitMapHeader->h * sizeof(Uint32));
 	
