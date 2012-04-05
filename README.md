@@ -1,6 +1,6 @@
-libSDL_ILBM
-===========
-libSDL_ILBM is a package containing a library for displaying ILBM images and to
+SDL_ILBM
+========
+SDL_ILBM is a package containing a library for displaying ILBM images and to
 manage their state in SDL applications. Additionally, this package contains
 `ilbmviewer`, a command-line utility which can be used to view a collection ILBM
 images inside an IFF file and to enable the cycling of color ranges.
