@@ -48,6 +48,7 @@ AC_SUBST(SDL_LIBS)
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+src/SDL_ILBM.pc
 src/SDL_ILBM/Makefile
 src/ilbmviewer/Makefile
 doc/Makefile

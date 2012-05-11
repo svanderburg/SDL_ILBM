@@ -1,4 +1,4 @@
-/** 
+/*
  * Copyright (c) 2012 Sander van der Burg
  *
  * This software is provided 'as-is', without any express or implied warranty.
