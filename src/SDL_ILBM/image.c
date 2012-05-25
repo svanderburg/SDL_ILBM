@@ -57,7 +57,7 @@ SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, 
 	IFF_UByte *indexes = ILBM_deinterleave(image);
 	
 	/* For an amiga ILBM image, we have to convert bitplanes to chunky format */
-	indexPixels = amiVideo_bitplanesToChunky(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes);
+	indexPixels = amiVideo_bitplanesToChunky(indexes, image->bitMapHeader->w, image->bitMapHeader->h, picture->pitch, image->bitMapHeader->nPlanes);
 	
 	free(indexes);
     }
@@ -116,7 +116,7 @@ SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image)
 	return NULL;
     }
     
-    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
+    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->w, image->bitMapHeader->nPlanes, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
     
     rgbPixels = (Uint32*)malloc(image->bitMapHeader->w * image->bitMapHeader->h * sizeof(Uint32));
 	
