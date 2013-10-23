@@ -27,28 +27,210 @@
 #include <SDL.h>
 #include <libilbm/ilbm.h>
 #include <libilbm/ilbmimage.h>
+#include <libamivideo/screen.h>
+#include <libamivideo/viewportmode.h>
 #include "window.h"
 #include "image.h"
 #include "cycle.h"
 
-int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode)
+typedef enum
+{
+    SDL_ILBM_STATUS_NONE,
+    SDL_ILBM_STATUS_QUIT,
+    SDL_ILBM_STATUS_PREVIOUS,
+    SDL_ILBM_STATUS_NEXT,
+    SDL_ILBM_STATUS_ERROR
+}
+SDL_ILBM_Status;
+
+static int updatePaletteAndSurface(amiVideo_Screen *screen, const ILBM_Image *image, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor, SDL_Surface *pictureSurface, SDL_ILBM_Window *window)
+{
+    if(format == SDL_ILBM_FORMAT_CHUNKY)
+    {
+	/* Switch palette colors for chunky graphics which can be done quite efficiently */
+	amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+	SDL_ILBM_setPalette(pictureSurface, &screen->palette);
+    }
+    else
+	SDL_ILBM_convertScreenPixelsToSurfacePixels(image, screen, pictureSurface, format, lowresPixelScaleFactor); /* Do the complete conversion cycle which is more work */
+    
+    /* Reblit the picture surface on the window */
+    return SDL_ILBM_blitPictureInWindow(window);
+}
+
+static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format format, const unsigned int number, const unsigned int imagesLength, const unsigned int lowresPixelScaleFactor, const unsigned int options)
+{
+    SDL_ILBM_Window window;
+    SDL_Surface *pictureSurface;
+    SDL_ILBM_RangeTimes rangeTimes;
+    amiVideo_Screen screen;
+    unsigned int realLowresPixelScaleFactor;
+    SDL_ILBM_Format realFormat;
+    SDL_ILBM_Status status = SDL_ILBM_STATUS_NONE;
+    int cycle, fullscreen, stretch;
+    
+    /* Initialize conversion screen */
+    IFF_UByte *bitplanes = SDL_ILBM_initScreenFromImage(image, &screen);
+    
+    /* Auto select lowres pixel scale factor, if needed */
+    if(lowresPixelScaleFactor == 0)
+	realLowresPixelScaleFactor = amiVideo_autoSelectLowresPixelScaleFactor(screen.viewportMode);
+    else
+	realLowresPixelScaleFactor = lowresPixelScaleFactor;
+
+    /* Auto select format, if needed */
+    if(format == SDL_ILBM_FORMAT_AUTO)
+        realFormat = amiVideo_autoSelectColorFormat(screen.viewportMode);
+    else
+	realFormat = format;
+
+    /* Determine fullscreen option */
+    if(options & SDL_ILBM_OPTION_FULLSCREEN)
+        fullscreen = TRUE;
+    else
+        fullscreen = FALSE;
+    
+    /* Determine whether to stretch */
+    if(options & SDL_ILBM_OPTION_STRETCH)
+        stretch = TRUE;
+    else
+	stretch = FALSE;
+
+    /* Determine whether to cycle */
+    if(options & SDL_ILBM_OPTION_CYCLE)
+	cycle = TRUE;
+    else
+	cycle = FALSE;
+    
+    /* Convert the image */
+    pictureSurface = SDL_ILBM_generateSurfaceFromScreen(image, &screen, realFormat, realLowresPixelScaleFactor);
+    
+    if(pictureSurface == NULL)
+    {
+	fprintf(stderr, "Cannot generate surface from screen!\n");
+	amiVideo_cleanupScreen(&screen);
+	return SDL_ILBM_STATUS_QUIT;
+    }
+    
+    /* Initialize window */
+    SDL_ILBM_initWindow(&window, image, &screen, pictureSurface, fullscreen, stretch, realLowresPixelScaleFactor);
+    
+    /* Set window title */
+    SDL_WM_SetCaption("SDL ILBM Viewer", "ilbmviewer");
+    
+    /* Initialize cycle times */
+    SDL_ILBM_initRangeTimes(&rangeTimes, image);
+    
+    /* Blit the picture in the window */
+    if(!SDL_ILBM_blitPictureInWindow(&window))
+	status = SDL_ILBM_STATUS_QUIT;
+
+    /* Main loop taking care of user events */
+    while(status == SDL_ILBM_STATUS_NONE)
+    {
+	SDL_Event event;
+	
+	while(SDL_PollEvent(&event))
+	{
+	    switch(event.type)
+	    {
+		case SDL_KEYDOWN:
+		    switch(event.key.keysym.sym)
+		    {
+			case SDLK_f:
+				if(!SDL_ILBM_toggleWindowFullscreen(&window))
+				    status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_s:
+				if(!SDL_ILBM_toggleWindowStretch(&window))
+				    status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_ESCAPE:
+			    status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_SPACE:
+			case SDLK_PAGEDOWN:
+			    if(number < imagesLength - 1)
+				status = SDL_ILBM_STATUS_NEXT;
+			    break;
+			    
+			case SDLK_PAGEUP:
+			    if(number > 0)
+				status = SDL_ILBM_STATUS_PREVIOUS;
+			    break;
+			
+			case SDLK_TAB:
+			    cycle = !cycle;
+			    
+			    if(!cycle)
+			    {
+				SDL_ILBM_initPaletteFromImage(image, &screen.palette);
+				if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
+				    status = SDL_ILBM_STATUS_QUIT;
+			    }
+			    break;
+			
+			case SDLK_LEFT:
+			    if(!SDL_ILBM_scrollWindowLeft(&window))
+				status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_RIGHT:
+			    if(!SDL_ILBM_scrollWindowRight(&window))
+				status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_UP:
+			    if(!SDL_ILBM_scrollWindowUp(&window))
+				status = SDL_ILBM_STATUS_QUIT;
+			    break;
+			
+			case SDLK_DOWN:
+			    if(!SDL_ILBM_scrollWindowDown(&window))
+				status = SDL_ILBM_STATUS_QUIT;
+			    break;
+		    }
+		    break;
+		    
+		case SDL_QUIT:
+		    status = SDL_ILBM_STATUS_QUIT;
+		    break;
+	    }
+	}
+	
+	/* If cycle mode is enabled, do the work that is needed to switch the colors */
+	if(cycle)
+	{
+	    SDL_ILBM_shiftActiveRanges(&rangeTimes, image, &screen.palette);
+	    if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
+		status = SDL_ILBM_STATUS_QUIT;
+	}
+	
+	/* Flip screen buffers, so that changes become visible */
+	if(SDL_Flip(window.windowSurface) < 0)
+	    fprintf(stderr, "SDL flip failed, reason: %s!\n", SDL_GetError());
+    }
+    
+    /* Cleanup */
+    
+    SDL_ILBM_cleanupRangeTimes(&rangeTimes);
+    SDL_FreeSurface(pictureSurface);
+    amiVideo_cleanupScreen(&screen);
+    free(bitplanes);
+    
+    /* Return exit status */
+    return status;
+}
+
+int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, unsigned int number, const unsigned int lowresPixelScaleFactor, const unsigned int options)
 {
     IFF_Chunk *chunk;
     ILBM_Image **images;
     unsigned int imagesLength;
-    int quit = FALSE;
-    unsigned int imageNumber = 0;
-    
-    /* Initialize video subsystem */
-    if(SDL_Init(SDL_INIT_VIDEO) == -1)
-    {
-	fprintf(stderr, "Error initialising SDL video subsystem, reason: %s\n", SDL_GetError());
-	return 1;
-    }
-    
-    /* Enable keyboard repeat */
-    if(SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL) < 0)
-	fprintf(stderr, "Cannot enable keyboard repeat!\n");
+    SDL_ILBM_Status status = SDL_ILBM_STATUS_NONE;
     
     /* Open the ILBM file */
     chunk = ILBM_read(filename);
@@ -56,6 +238,7 @@ int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorM
     if(chunk == NULL)
     {
 	fprintf(stderr, "Error parsing ILBM file!\n");
+	ILBM_free(chunk);
 	return 1;
     }
     
@@ -66,196 +249,62 @@ int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorM
     if(!ILBM_checkImages(chunk, images, imagesLength))
     {
 	fprintf(stderr, "ILBM file is not valid!\n");
+	ILBM_freeImages(images, imagesLength);
+	ILBM_free(chunk);
 	return 1;
     }
     
     if(imagesLength == 0)
     {
-	fprintf(stderr, "Error extracting ILBM images from IFF file!\n");
+	fprintf(stderr, "There are no (valid) ILBM images in the IFF file!\n");
+	ILBM_freeImages(images, imagesLength);
+	ILBM_free(chunk);
 	return 1;
     }
     
-    while(!quit)
+    if(number > imagesLength - 1)
     {
-	SDL_ILBM_Window window;
-	SDL_Surface *picture, *screen;
-	SDL_ILBM_RangeTimes rangeTimes;
-	SDL_Color *colors = NULL, *originalColors = NULL;
-	unsigned int colorsLength;
-	int cycle = FALSE;
-	int switchPicture = FALSE;
-	SDL_ILBM_ColorMode currentColorMode;
-	int xOffset = 0, yOffset = 0;
-	int fullscreen = 0;
-	int stretch = FALSE;
-	
-	ILBM_Image *image = images[imageNumber];
-    
-	/* Determine color mode */
-	
-	currentColorMode = SDL_ILBM_autoPickColorMode(image, colorMode);
-	
-	/* Create picture surface */
-    
-	if(currentColorMode == SDL_ILBM_COLOR_INDEX8)
-	{
-	    colors = SDL_ILBM_computeColors(image, &colorsLength);
-	    picture = SDL_ILBM_createChunkySurface(image, colors, colorsLength);
-	    
-	    originalColors = (SDL_Color*)malloc(colorsLength * sizeof(SDL_Color));
-	    SDL_ILBM_restorePalette(colors, originalColors, colorsLength);
-	}
-	else
-	    picture = SDL_ILBM_createRGBASurface(image);
-    
-	/* Initialize window surface */
-    
-	SDL_ILBM_initWindow(&window, image);
-	
-	screen = SDL_ILBM_updateWindowSettings(&window, fullscreen, stretch);
-    
-	if(screen == NULL)
-	{
-	    fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
-	    return 1;
-	}
-	
-	/* Set window title */
-	SDL_WM_SetCaption("SDL ILBM Viewer", "ilbmviewer");
-    
-	/* Blit the picture on the surface */
-	SDL_ILBM_drawPicture(picture, screen, 0, 0);
-	
-	/* Initialize cycle times */
-	SDL_ILBM_initRangeTimes(&rangeTimes, image);
-	
-	/* Main loop */
-	
-	while(!quit && !switchPicture)
-	{
-	    SDL_Event event;
-	
-	    while(SDL_PollEvent(&event))
-	    {
-		switch(event.type)
-		{
-		    case SDL_KEYDOWN:
-			switch(event.key.keysym.sym)
-			{
-			    case SDLK_f:
-				if(fullscreen)
-				    fullscreen = 0;
-				else
-				    fullscreen = SDL_FULLSCREEN;
-				
-				screen = SDL_ILBM_updateWindowSettings(&window, fullscreen, stretch);
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-			
-			    case SDLK_s:
-				stretch = !stretch;
-				
-				xOffset = 0;
-				yOffset = 0;
-				
-				screen = SDL_ILBM_updateWindowSettings(&window, fullscreen, stretch);
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-			
-			    case SDLK_LEFT:
-				if(xOffset > 0)
-				    xOffset--;
-				
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-				
-			    case SDLK_RIGHT:
-				if(xOffset < image->bitMapHeader->w - window.width)
-				    xOffset++;
-				
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-			    
-			    case SDLK_UP:
-				if(yOffset > 0)
-				    yOffset--;
-				
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-			
-			    case SDLK_DOWN:
-				if(yOffset < image->bitMapHeader->h - window.height)
-				    yOffset++;
-				
-				SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
-				break;
-			    
-			    case SDLK_SPACE:
-			    case SDLK_PAGEDOWN:
-				if(imageNumber < imagesLength - 1)
-				    imageNumber++;
-				
-				switchPicture = TRUE;
-				break;
-			
-			    case SDLK_PAGEUP:
-				if(imageNumber > 0)
-				    imageNumber--;
-				
-				switchPicture = TRUE;
-				break;
-				
-			    case SDLK_ESCAPE:
-				quit = TRUE;
-				break;
-			    
-			    case SDLK_TAB:
-				if(currentColorMode == SDL_ILBM_COLOR_INDEX8)
-				{
-				    cycle = !cycle;
-			    
-				    /* Restore the original color palette */
-				    if(!cycle)
-				    {
-					SDL_ILBM_restorePalette(originalColors, colors, colorsLength);
-					SDL_ILBM_updatePalette(colors, colorsLength, picture, screen, xOffset, yOffset);
-				    }
-				}
-				break;
-			}
-			break;
-		    
-		    case SDL_QUIT:
-			quit = TRUE;
-			break;
-		}
-	    }
-	
-	    if(cycle)
-	    {
-		SDL_ILBM_shiftActiveRanges(&rangeTimes, image, colors);
-		SDL_ILBM_updatePalette(colors, colorsLength, picture, screen, xOffset, yOffset);
-	    }
-	
-	    if(SDL_Flip(screen) < 0)
-	    {
-		fprintf(stderr, "SDL flip failed: %s!\n", SDL_GetError());
-		return 1;
-	    }
-	}
-    
-	/* Clean up */
-    
-	SDL_FreeSurface(picture);
-	SDL_ILBM_freeRangeTimes(&rangeTimes);
-	free(originalColors);
-	free(colors);
+	fprintf(stderr, "Image with index: %d does not exist. Valid ranges are: 0 - %d\n", number, imagesLength - 1);
+	ILBM_freeImages(images, imagesLength);
+	ILBM_free(chunk);
+	return 1;
     }
     
+    /* Initialize video subsystem */
+    if(SDL_Init(SDL_INIT_VIDEO) == -1)
+    {
+	fprintf(stderr, "Error initialising SDL video subsystem, reason: %s\n", SDL_GetError());
+	ILBM_freeImages(images, imagesLength);
+	ILBM_free(chunk);
+	return 1;
+    }
+    
+    /* Enable keyboard repeat */
+    if(SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL) < 0)
+	fprintf(stderr, "Cannot enable keyboard repeat!\n");
+    
+    /* Main loop */
+    while(status != SDL_ILBM_STATUS_QUIT && status != SDL_ILBM_STATUS_ERROR)
+    {
+        ILBM_Image *image = images[number];
+        status = viewILBMImage(image, format, number, imagesLength, lowresPixelScaleFactor, options);
+        
+        switch(status)
+        {
+	    case SDL_ILBM_STATUS_PREVIOUS:
+		number--;
+		break;
+	    case SDL_ILBM_STATUS_NEXT:
+		number++;
+		break;
+        }
+    }
+    
+    /* Cleanup */
     ILBM_freeImages(images, imagesLength);
     ILBM_free(chunk);
-    
     SDL_Quit();
     
-    return 0;
+    /* Return the exit status */
+    return (status == SDL_ILBM_STATUS_ERROR);
 }

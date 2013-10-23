@@ -24,8 +24,12 @@
 
 #ifndef __SDL_ILBM_VIEWER_H
 #define __SDL_ILBM_VIEWER_H
-#include "colors.h"
+#include "image.h"
 
-int SDL_ILBM_viewILBMImage(const char *filename, const SDL_ILBM_ColorMode colorMode);
+#define SDL_ILBM_OPTION_CYCLE 0x1
+#define SDL_ILBM_OPTION_STRETCH 0x2
+#define SDL_ILBM_OPTION_FULLSCREEN 0x4
+
+int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, unsigned int number, const unsigned int lowresPixelScaleFactor, const unsigned int options);
 
 #endif

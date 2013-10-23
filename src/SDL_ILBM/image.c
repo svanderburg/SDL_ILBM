@@ -23,120 +23,236 @@
  */
 
 #include "image.h"
+#include <stdlib.h>
+#include <SDL.h>
 #include <libilbm/interleave.h>
 #include <libilbm/byterun.h>
-#include <libamivideo/palette.h>
-#include <libamivideo/bitplane.h>
-#include "colors.h"
+#include <libamivideo/viewportmode.h>
 
-SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, const unsigned int colorsLength)
+void SDL_ILBM_initPaletteFromImage(const ILBM_Image *image, amiVideo_Palette *palette)
 {
-    SDL_Surface *picture;
-    amiVideo_UByte *indexPixels;
+    if(image->colorMap == NULL)
+	amiVideo_setBitplanePaletteColors(palette, NULL, 0); /* If no colormap is provided, set the palette to 0 */
+    else
+	amiVideo_setBitplanePaletteColors(palette, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength);
+}
+
+amiVideo_ULong SDL_ILBM_extractViewportModeFromImage(const ILBM_Image *image)
+{
+    amiVideo_ULong paletteFlags, resolutionFlags;
+    
+    if(image->viewport == NULL)
+        paletteFlags = 0; /* If no viewport value is set, assume 0 value */
+    else
+	paletteFlags = amiVideo_extractPaletteFlags(image->viewport->viewportMode); /* Only the palette flags can be considered "reliable" from a viewport mode value */
+	
+    /* Resolution flags are determined by looking at the page dimensions */
+    resolutionFlags = amiVideo_autoSelectViewportMode(image->bitMapHeader->pageWidth, image->bitMapHeader->pageHeight);
+    
+    /* Return the combined settings of the previous */
+    return paletteFlags | resolutionFlags;
+}
+
+IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen)
+{
+    /* Determine which viewport mode is best for displaying the image */
+    IFF_Long viewportMode = SDL_ILBM_extractViewportModeFromImage(image);
+
+    /* Initialise screen width the image's dimensions, bitplane depth, and viewport mode */
+    amiVideo_initScreen(screen, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->nPlanes, 8, viewportMode);
+    
+    /* Sets the colors of the palette */
+    SDL_ILBM_initPaletteFromImage(image, &screen->palette);
     
     /* Decompress the image body */
     ILBM_unpackByteRun(image);
-    
-    picture = SDL_CreateRGBSurface(SDL_SWSURFACE, image->bitMapHeader->w, image->bitMapHeader->h, 8, 0, 0, 0, 0);
-    
-    if(picture == NULL)
-    {
-	fprintf(stderr, "Cannot create picture surface!\n");
-	return NULL;
-    }
     
     if(ILBM_imageIsPBM(image))
     {
-	/* A PBM image is not interleaved and already in chunky format, so we just have to copy the stuff */
-	indexPixels = (amiVideo_UByte*)malloc(image->body->chunkSize * sizeof(amiVideo_UByte));
-	memcpy(indexPixels, image->body->chunkData, image->body->chunkSize);
+	amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, (amiVideo_UByte*)image->body->chunkData, image->bitMapHeader->w); /* A PBM has chunky pixels in its body */
+	return NULL;
     }
     else
     {
-	/* Amiga ILBM image is interleaved. We have to deinterleave it in order to be able to convert it */
-	IFF_UByte *indexes = ILBM_deinterleave(image);
+	/* Amiga ILBM image has interleaved scanlines per bitplane. We have to deinterleave it in order to be able to convert it */
+	IFF_UByte *bitplanes = ILBM_deinterleave(image);
 	
-	/* For an amiga ILBM image, we have to convert bitplanes to chunky format */
-	indexPixels = amiVideo_bitplanesToChunky(indexes, image->bitMapHeader->w, image->bitMapHeader->h, picture->pitch, image->bitMapHeader->nPlanes);
+	/* Set bitplane pointers of the conversion screen */
+	amiVideo_setScreenBitplanes(screen, bitplanes);
 	
-	free(indexes);
+	/* Return deinterleaved bitplanes */
+	return bitplanes;
     }
-    
-    /* Attach pixels */
-    
-    if(SDL_LockSurface(picture) < 0)
-    {
-	fprintf(stderr, "Error locking surface: %s\n", SDL_GetError());
-	return NULL;
-    }
-    
-    picture->pixels = indexPixels;
-    
-    SDL_UnlockSurface(picture);
-    
-    SDL_SetPalette(picture, SDL_LOGPAL | SDL_PHYSPAL, colors, 0, colorsLength);
-    
-    return picture;
 }
 
-void SDL_ILBM_updatePalette(SDL_Color *colors, unsigned int colorsLength, SDL_Surface *picture, SDL_Surface *screen, int xOffset, int yOffset)
+int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette)
 {
-    SDL_SetPalette(picture, SDL_LOGPAL | SDL_PHYSPAL, (SDL_Color*)colors, 0, colorsLength);
-    SDL_ILBM_drawPicture(picture, screen, xOffset, yOffset);
+    if(SDL_SetPalette(surface, SDL_LOGPAL | SDL_PHYSPAL, (SDL_Color*)palette->chunkyFormat.color, 0, palette->chunkyFormat.numOfColors) == 0)
+	return FALSE;
+    else
+	return TRUE;
 }
 
-void SDL_ILBM_drawPicture(SDL_Surface *src, SDL_Surface *dest, int xOffset, int yOffset)
+int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor)
 {
-    SDL_Rect dstrect;
-    dstrect.x = -xOffset;
-    dstrect.y = -yOffset;
-    
-    if(SDL_BlitSurface(src, NULL, dest, &dstrect) < 0)
-	fprintf(stderr, "Error blitting surface: %s!\n", SDL_GetError());
-}
-
-SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image)
-{
-    IFF_UByte *indexes;
-    SDL_Surface *picture;
-    amiVideo_OutputColor *colorPixels;
-    Uint32 *rgbPixels;
-    unsigned int i;
-    
-    /* Decompress the image body */
-    ILBM_unpackByteRun(image);
-    
-    indexes = ILBM_deinterleave(image);
-    
-    picture = SDL_CreateRGBSurface(SDL_SWSURFACE, image->bitMapHeader->w, image->bitMapHeader->h, 32, 0, 0, 0, 0);
-    
-    if(picture == NULL)
+    if(lowresPixelScaleFactor == 1)
     {
-	fprintf(stderr, "Cannot create picture surface!\n");
-	return NULL;
+	if(format == SDL_ILBM_FORMAT_CHUNKY)
+	{
+	    /* Convert the colors of the the bitplane palette to the format of the chunky palette */
+	    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+	    
+	    /* Set the palette of the target SDL surface */
+	    if(!SDL_ILBM_setPalette(surface, &screen->palette))
+		return FALSE;
+	    
+	    if(image->body != NULL)
+	    {
+	        /* Populate the surface with pixels in chunky format */
+		if(SDL_LockSurface(surface) == 1)
+		{
+		    fprintf(stderr, "Cannot lock the surface!\n");
+		    return FALSE;
+		}
+	    
+		if(ILBM_imageIsPBM(image))
+		    memcpy(screen->uncorrectedChunkyFormat.pixels, image->body->chunkData, image->body->chunkSize);
+		else
+		    amiVideo_convertScreenBitplanesToChunkyPixels(screen); /* Convert the bitplanes to chunky pixels */
+		
+		SDL_UnlockSurface(surface);
+	    }
+	}
+	else
+	{
+	    if(image->body != NULL)
+	    {
+		/* Populate the surface with pixels in RGB format */
+		if(SDL_LockSurface(surface) == 1)
+		{
+		    fprintf(stderr, "Cannot lock the surface!\n");
+		    return FALSE;
+		}
+	    
+		if(ILBM_imageIsPBM(image))
+		{
+		    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+		    amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
+		}
+		else
+		    amiVideo_convertScreenBitplanesToRGBPixels(screen); /* Convert the bitplanes to RGB pixels */
+	    
+		SDL_UnlockSurface(surface);
+	    }
+	}
     }
-    
-    colorPixels = amiVideo_bitplanesToRGB(indexes, image->bitMapHeader->w, image->bitMapHeader->h, image->bitMapHeader->w, image->bitMapHeader->nPlanes, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength, 8, image->viewport->viewportMode);
-    
-    rgbPixels = (Uint32*)malloc(image->bitMapHeader->w * image->bitMapHeader->h * sizeof(Uint32));
+    else
+    {
+	if(format == SDL_ILBM_FORMAT_CHUNKY)
+	{
+	    /* Convert the colors of the the bitplane palette to the format of the chunky palette */
+	    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+	    
+	    /* Set the palette of the target SDL surface */
+	    if(!SDL_ILBM_setPalette(surface, &screen->palette))
+		return FALSE;
 	
-    for(i = 0; i < image->bitMapHeader->w * image->bitMapHeader->h; i++)
-        rgbPixels[i] = SDL_MapRGB(picture->format, colorPixels[i].r, colorPixels[i].g, colorPixels[i].b);
-    
-    /* Attach pixels */
-    
-    if(SDL_LockSurface(picture) < 0)
-    {
-	fprintf(stderr, "Error locking surface: %s\n", SDL_GetError());
-	return NULL;
+	    if(image->body != NULL)
+	    {
+		/* Populate the surface with pixels in chunky format */
+		if(SDL_LockSurface(surface) == 1)
+		{
+		    fprintf(stderr, "Cannot lock the surface!\n");
+		    return FALSE;
+		}
+		
+		if(ILBM_imageIsPBM(image))
+		    amiVideo_correctScreenPixels(screen);
+		else
+		    amiVideo_convertScreenBitplanesToCorrectedChunkyPixels(screen); /* Convert the bitplanes to corrected chunky pixels */
+	    
+		SDL_UnlockSurface(surface);
+	    }
+	}
+	else
+	{
+	    /* Populate the surface with pixels in RGB format */
+	    if(image->body != NULL)
+	    {
+		if(SDL_LockSurface(surface) == 1)
+		{
+		    fprintf(stderr, "Cannot lock the surface!\n");
+		    return FALSE;
+		}
+		
+		if(ILBM_imageIsPBM(image))
+		{
+		    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+		    amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(screen);
+		}
+		else
+		    amiVideo_convertScreenBitplanesToCorrectedRGBPixels(screen); /* Convert the bitplanes to corrected RGB pixels */
+	    
+		SDL_UnlockSurface(surface);
+	    }
+	}
     }
     
-    picture->pixels = rgbPixels;
+    return TRUE;
+}
+
+SDL_Surface *SDL_ILBM_generateSurfaceFromScreen(const ILBM_Image *image, amiVideo_Screen *screen, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor)
+{
+    int depth;
+    SDL_Surface *surface;
+    int width, height;
+    int allocateUncorrectedMemory;
     
-    SDL_UnlockSurface(picture);
+    if(format == SDL_ILBM_FORMAT_CHUNKY)
+	depth = 8;
+    else
+	depth = 32;
+
+    if(lowresPixelScaleFactor == 1)
+    {
+	width = screen->width;
+	height = screen->height;
+    }
+    else
+    {
+	amiVideo_setLowresPixelScaleFactor(screen, lowresPixelScaleFactor);
+        
+	width = screen->correctedFormat.width;
+	height = screen->correctedFormat.height;
+    }
+
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, 0, 0, 0, 0);
     
-    free(colorPixels);
-    free(indexes);
+    /* Set the output format pointers */
     
-    return picture;
+    allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
+    
+    if(lowresPixelScaleFactor == 1)
+    {
+	if(format == SDL_ILBM_FORMAT_CHUNKY)
+	    amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, surface->pixels, surface->pitch); /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
+	else
+	    amiVideo_setScreenUncorrectedRGBPixelsPointer(screen, surface->pixels, surface->pitch, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift); /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
+    }
+    else
+    {
+        if(format == SDL_ILBM_FORMAT_CHUNKY)
+	    amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 1, allocateUncorrectedMemory, 0, 0, 0); /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
+        else
+	    amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 4, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift); /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
+    }
+    
+    /* Convert pixels */
+    if(SDL_ILBM_convertScreenPixelsToSurfacePixels(image, screen, surface, format, lowresPixelScaleFactor))
+	return surface;
+    else
+    {
+	SDL_FreeSurface(surface);
+	return NULL;
+    }
 }

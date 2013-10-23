@@ -25,51 +25,55 @@
 #include "cycle.h"
 #include <stdlib.h>
 
-static void shiftColorRange(SDL_Color *colors, const ILBM_ColorRange *colorRange)
+static void shiftColorRange(amiVideo_Palette *palette, const ILBM_ColorRange *colorRange)
 {
     unsigned int i;
-    SDL_Color temp = colors[colorRange->low];
+    amiVideo_Color *color = palette->bitplaneFormat.color;
+    amiVideo_Color temp = color[colorRange->low];
 
     for(i = colorRange->low; i < colorRange->high; i++)
-	colors[i] = colors[i + 1];
+	color[i] = color[i + 1];
 
-    colors[colorRange->high] = temp;
+    color[colorRange->high] = temp;
 }
 
-static void shiftDRange(SDL_Color *colors, const ILBM_DRange *drange)
+static void shiftDRange(amiVideo_Palette *palette, const ILBM_DRange *drange)
 {
     unsigned int i;
-    SDL_Color temp = colors[drange->dindex[drange->min].index];
+    amiVideo_Color *color = palette->bitplaneFormat.color;
+    amiVideo_Color temp = color[drange->dindex[drange->min].index];
 
     for(i = drange->min; i < drange->max; i++)
-	colors[drange->dindex[i].index] = colors[drange->dindex[i + 1].index];
+	color[drange->dindex[i].index] = color[drange->dindex[i + 1].index];
 
-    colors[drange->dindex[drange->max].index] = temp;
+    color[drange->dindex[drange->max].index] = temp;
 }
 
-static void shiftCycleInfo(SDL_Color *colors, const ILBM_CycleInfo *cycleInfo)
+static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycleInfo)
 {
+    amiVideo_Color *color = palette->bitplaneFormat.color;
+    
     if(cycleInfo->direction == -1)
     {
 	/* Shift left */
 	unsigned int i;
-	SDL_Color temp = colors[cycleInfo->end];
+	amiVideo_Color temp = color[cycleInfo->end];
 	
 	for(i = cycleInfo->end; i > cycleInfo->start; i--)
-	    colors[i] = colors[i - 1];
+	    color[i] = color[i - 1];
 	
-	colors[cycleInfo->start] = temp;
+	color[cycleInfo->start] = temp;
     }
     else if(cycleInfo->direction == 1)
     {
 	/* Shift right */
 	unsigned int i;
-	SDL_Color temp = colors[cycleInfo->start];
+	amiVideo_Color temp = color[cycleInfo->start];
 	
 	for(i = cycleInfo->start; i < cycleInfo->end; i++)
-	    colors[i] = colors[i + 1];
+	    color[i] = color[i + 1];
 	
-	colors[cycleInfo->end] = temp;
+	color[cycleInfo->end] = temp;
     }
 }
 
@@ -91,7 +95,7 @@ static Uint32 computeCycleInfoTime(const Uint32 ticks, const ILBM_CycleInfo *cyc
 void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image)
 {
     unsigned int i;
-    Uint32 ticks; 
+    Uint32 ticks;
     
     rangeTimes->crngTimes = (Uint32*)malloc(image->colorRangeLength * sizeof(Uint32));
     rangeTimes->drngTimes = (Uint32*)malloc(image->drangeLength * sizeof(Uint32));
@@ -109,7 +113,14 @@ void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *
         rangeTimes->ccrtTimes[i] = computeCycleInfoTime(ticks, image->cycleInfo[i]);
 }
 
-void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image, SDL_Color *colors)
+void SDL_ILBM_cleanupRangeTimes(SDL_ILBM_RangeTimes *rangeTimes)
+{
+    free(rangeTimes->crngTimes);
+    free(rangeTimes->drngTimes);
+    free(rangeTimes->ccrtTimes);
+}
+
+void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image, amiVideo_Palette *palette)
 {
     unsigned int i;
     Uint32 *crngTimes = rangeTimes->crngTimes;
@@ -123,10 +134,8 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
 	
 	if(colorRange->active != 0 && ticks >= crngTimes[i])
 	{
-	    shiftColorRange(colors, colorRange);
-	    
-	    /* Update time */
-	    crngTimes[i] = computeColorRangeTime(ticks, colorRange);
+	    shiftColorRange(palette, colorRange);
+	    crngTimes[i] = computeColorRangeTime(ticks, colorRange); /* Update time */
 	}
     }
 
@@ -136,10 +145,8 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
 	
 	if(drange->flags == ILBM_RNG_ACTIVE && ticks >= drngTimes[i])
 	{
-	    shiftDRange(colors, drange);
-		    
-	    /* Update time */
-	    drngTimes[i] = computeDRangeTime(ticks, drange);
+	    shiftDRange(palette, drange);
+	    drngTimes[i] = computeDRangeTime(ticks, drange); /* Update time */
 	}
     }
     
@@ -149,22 +156,8 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
 	
 	if(cycleInfo->direction != 0 && ticks >= ccrtTimes[i])
 	{
-	    shiftCycleInfo(colors, cycleInfo);
-	    
-	    /* Update time */
-	    ccrtTimes[i] = computeCycleInfoTime(ticks, cycleInfo);
+	    shiftCycleInfo(palette, cycleInfo);
+	    ccrtTimes[i] = computeCycleInfoTime(ticks, cycleInfo); /* Update time */
 	}
     }
-}
-
-void SDL_ILBM_freeRangeTimes(SDL_ILBM_RangeTimes *rangeTimes)
-{
-    free(rangeTimes->crngTimes);
-    free(rangeTimes->drngTimes);
-    free(rangeTimes->ccrtTimes);
-}
-
-void SDL_ILBM_restorePalette(const SDL_Color *originalColors, SDL_Color *colors, const unsigned int colorsLength)
-{
-    memcpy(colors, originalColors, colorsLength * sizeof(SDL_Color));
 }

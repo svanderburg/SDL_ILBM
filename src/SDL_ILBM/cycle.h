@@ -29,6 +29,7 @@ typedef struct SDL_ILBM_RangeTimes SDL_ILBM_RangeTimes;
 
 #include <SDL.h>
 #include <libilbm/ilbmimage.h>
+#include <libamivideo/palette.h>
 
 struct SDL_ILBM_RangeTimes
 {
@@ -39,10 +40,8 @@ struct SDL_ILBM_RangeTimes
 
 void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image);
 
-void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image, SDL_Color *colors);
+void SDL_ILBM_cleanupRangeTimes(SDL_ILBM_RangeTimes *rangeTimes);
 
-void SDL_ILBM_freeRangeTimes(SDL_ILBM_RangeTimes *rangeTimes);
-
-void SDL_ILBM_restorePalette(const SDL_Color *originalColors, SDL_Color *colors, const unsigned int colorsLength);
+void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image, amiVideo_Palette *palette);
 
 #endif

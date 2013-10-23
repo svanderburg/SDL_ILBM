@@ -27,13 +27,27 @@
 
 #include <SDL.h>
 #include <libilbm/ilbmimage.h>
+#include <libamivideo/screen.h>
+#include <libamivideo/palette.h>
 
-SDL_Surface *SDL_ILBM_createChunkySurface(ILBM_Image *image, SDL_Color *colors, unsigned int colorsLength);
+typedef enum
+{
+    SDL_ILBM_FORMAT_AUTO = 0,
+    SDL_ILBM_FORMAT_CHUNKY = 1,
+    SDL_ILBM_FORMAT_RGB = 4
+}
+SDL_ILBM_Format;
 
-void SDL_ILBM_updatePalette(SDL_Color *colors, unsigned int colorsLength, SDL_Surface *picture, SDL_Surface *screen, int xOffset, int yOffset);
+void SDL_ILBM_initPaletteFromImage(const ILBM_Image *image, amiVideo_Palette *palette);
 
-void SDL_ILBM_drawPicture(SDL_Surface *src, SDL_Surface *dest, int xOffset, int yOffset);
+amiVideo_ULong SDL_ILBM_extractViewportModeFromImage(const ILBM_Image *image);
 
-SDL_Surface *SDL_ILBM_createRGBASurface(ILBM_Image *image);
+IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen);
+
+int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette);
+
+int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor);
+
+SDL_Surface *SDL_ILBM_generateSurfaceFromScreen(const ILBM_Image *image, amiVideo_Screen *screen, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor);
 
 #endif

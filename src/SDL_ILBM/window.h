@@ -29,16 +29,38 @@ typedef struct SDL_ILBM_Window SDL_ILBM_Window;
 
 #include <SDL.h>
 #include <libilbm/ilbmimage.h>
+#include <libamivideo/screen.h>
 
 struct SDL_ILBM_Window
 {
     const ILBM_Image *image;
+    const amiVideo_Screen *screen;
+    SDL_Surface *pictureSurface;
+    SDL_Surface *windowSurface;
     int width;
     int height;
+    Sint16 xOffset, yOffset;
+    int fullscreen;
+    int stretch;
+    unsigned int lowresPixelScaleFactor;
 };
 
-void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const ILBM_Image *image);
+void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const ILBM_Image *image, const amiVideo_Screen *screen, SDL_Surface *pictureSurface, const int fullscreen, const int stretch, const unsigned int lowresPixelScaleFactor);
 
-SDL_Surface *SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window, const int fullscreen, const int stretch);
+void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window);
+
+int SDL_ILBM_blitPictureInWindow(SDL_ILBM_Window *window);
+
+int SDL_ILBM_toggleWindowFullscreen(SDL_ILBM_Window *window);
+
+int SDL_ILBM_toggleWindowStretch(SDL_ILBM_Window *window);
+
+int SDL_ILBM_scrollWindowLeft(SDL_ILBM_Window *window);
+
+int SDL_ILBM_scrollWindowRight(SDL_ILBM_Window *window);
+
+int SDL_ILBM_scrollWindowUp(SDL_ILBM_Window *window);
+
+int SDL_ILBM_scrollWindowDown(SDL_ILBM_Window *window);
 
 #endif
