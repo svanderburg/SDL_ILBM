@@ -32,7 +32,7 @@ Turns fullscreen mode on or off
 .PP
 \fBUP\fR, \fBDOWN\fR, \fBLEFT\fR, \fBRIGHT\fR
 .RS 4
-Changes the horizontal or vertical display offset, if the window size is smaller than the actual image size
+Changes the horizontal or vertical display offset, if the window page size is smaller than the actual image size
 .RE
 .PP
 \fBS\fR
@@ -47,12 +47,37 @@ Quits the viewer
 .PP
 .SH "OPTIONS"
 .PP
-\fB\-\-colormode\fR
+\fB-f\fR, \fB\-\-format\fR
 .RS 4
 Specifies to which output format the ILBM image should be converted. Values can be
-\fBindex8\fR to use 8-bit chunky graphics, \fBrgb\fR to use 24-bit RGB graphics.
+\fBchunky\fR to use 8-bit chunky graphics, \fBrgb\fR to use 32-bit RGB graphics.
 \fBauto\fR can be used to automatically pick the most suitable option, which is
 used by default.
+.RE
+.PP
+\fB-C\fR, \fB\-\-cycle\fR
+.RS 4
+Turn cycle mode on by default
+.RE
+.PP
+\fB-s\fR, \fB\-\-stretch\fR
+.RS 4
+Do not clip the picture inside the page but stretch it to its full size
+.RE
+.PP
+\fB-c\fR, \fB\-\-correct-aspect\fR
+.RS 4
+Specifies the scale factor of a lowres pixel to properly correct its aspect ratio. Possible values are: \fBauto\fR, \fBnone\fR, \fB2\fR, \fB4\fR
+.RE
+.PP
+\fB-F\fR, \fB\-\-fullscreen\fR
+.RS 4
+Views the picture in full screen
+.RE
+.PP
+\fB-n\fR, \fB\-\-number\fR
+.RS 4
+Displays the n-th picture inside the IFF scrap file. Defaults to: 0
 .RE
 .PP
 \fB\-h\fR, \fB\-\-help\fR
