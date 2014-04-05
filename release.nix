@@ -18,9 +18,9 @@ let
       with pkgs;
 
       let
-          libiff = builtins.getAttr (builtins.currentSystem) (libiffJobset.build);
-          libilbm = builtins.getAttr (builtins.currentSystem) (libilbmJobset.build);
-          libamivideo = builtins.getAttr (builtins.currentSystem) (libamivideoJobset.build);
+        libiff = builtins.getAttr (builtins.currentSystem) (libiffJobset.build);
+        libilbm = builtins.getAttr (builtins.currentSystem) (libilbmJobset.build);
+        libamivideo = builtins.getAttr (builtins.currentSystem) (libamivideoJobset.build);
       in
       releaseTools.sourceTarball {
         name = "SDL_ILBM-tarball";
