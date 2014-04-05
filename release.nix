@@ -1,5 +1,11 @@
 { nixpkgs ? <nixpkgs>
 , systems ? [ "i686-linux" "x86_64-linux" ]
+, libiffJobset ? import ../libiff/release.nix { inherit nixpkgs systems officialRelease; }
+, libilbmJobset ? import ../libilbm/release.nix { inherit nixpkgs systems officialRelease; }
+, libamivideoJobset ? import ../libamivideo/release.nix { inherit nixpkgs systems officialRelease; }
+, SDL_ILBM ? { outPath = ./.; rev = 1234; }
+, officialRelease ? false
+
 }:
 
 let
@@ -9,15 +15,13 @@ let
   
   jobs = rec {
     tarball =
-      { SDL_ILBM ? {outPath = ./.; rev = 1234;}
-      , officialRelease ? false
-      , libiff ? builtins.getAttr (builtins.currentSystem) ((import ../libiff/release.nix {}).build {})
-      , libilbm ? builtins.getAttr (builtins.currentSystem) ((import ../libilbm/release.nix {}).build {}) {}
-      , libamivideo ? builtins.getAttr (builtins.currentSystem) ((import ../libamivideo/release.nix {}).build {})
-      }:
-
       with pkgs;
 
+      let
+          libiff = builtins.getAttr (builtins.currentSystem) (libiffJobset.build);
+          libilbm = builtins.getAttr (builtins.currentSystem) (libilbmJobset.build);
+          libamivideo = builtins.getAttr (builtins.currentSystem) (libamivideoJobset.build);
+      in
       releaseTools.sourceTarball {
         name = "SDL_ILBM-tarball";
         src = SDL_ILBM;
@@ -27,16 +31,14 @@ let
       };
       
     build =
-      { tarball ? jobs.tarball {} }:
-      
       pkgs.lib.genAttrs systems (system:
-        { libiff ? builtins.getAttr system ((import ../libiff/release.nix {}).build {})
-        , libilbm ? builtins.getAttr system ((import ../libilbm/release.nix {}).build {}) {}
-        , libamivideo ? builtins.getAttr system ((import ../libamivideo/release.nix {}).build {})
-        }:
-        
         with import nixpkgs { inherit system; };
         
+        let
+          libiff = builtins.getAttr system (libiffJobset.build);
+          libilbm = builtins.getAttr system (libilbmJobset.build);
+          libamivideo = builtins.getAttr system (libamivideoJobset.build);
+        in
         releaseTools.nixBuild {
           name = "SDL_ILBM";
           inherit version;
