@@ -113,10 +113,7 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     }
     
     /* Initialize window */
-    SDL_ILBM_initWindow(&window, image, &screen, pictureSurface, fullscreen, stretch, realLowresPixelScaleFactor);
-    
-    /* Set window title */
-    SDL_WM_SetCaption("SDL ILBM Viewer", "ilbmviewer");
+    SDL_ILBM_initWindow(&window, "SDL ILBM Viewer", image, &screen, pictureSurface, fullscreen, stretch, realLowresPixelScaleFactor);
     
     /* Initialize cycle times */
     SDL_ILBM_initRangeTimes(&rangeTimes, image);
@@ -210,16 +207,15 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
 	}
 	
 	/* Flip screen buffers, so that changes become visible */
-	if(SDL_Flip(window.windowSurface) < 0)
-	    fprintf(stderr, "SDL flip failed, reason: %s!\n", SDL_GetError());
+	SDL_RenderPresent(window.renderer);
     }
     
     /* Cleanup */
-    
     SDL_ILBM_cleanupRangeTimes(&rangeTimes);
     SDL_FreeSurface(pictureSurface);
     amiVideo_cleanupScreen(&screen);
     free(bitplanes);
+    SDL_ILBM_destroyWindow(&window);
     
     /* Return exit status */
     return status;
@@ -278,10 +274,6 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
 	ILBM_free(chunk);
 	return 1;
     }
-    
-    /* Enable keyboard repeat */
-    if(SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL) < 0)
-	fprintf(stderr, "Cannot enable keyboard repeat!\n");
     
     /* Main loop */
     while(status != SDL_ILBM_STATUS_QUIT && status != SDL_ILBM_STATUS_ERROR)

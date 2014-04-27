@@ -87,10 +87,7 @@ IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *scre
 
 int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette)
 {
-    if(SDL_SetPalette(surface, SDL_LOGPAL | SDL_PHYSPAL, (SDL_Color*)palette->chunkyFormat.color, 0, palette->chunkyFormat.numOfColors) == 0)
-	return FALSE;
-    else
-	return TRUE;
+    return (SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)palette->chunkyFormat.color, 0, palette->chunkyFormat.numOfColors) == 0);
 }
 
 int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor)
@@ -109,7 +106,7 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
 	    if(image->body != NULL)
 	    {
 	        /* Populate the surface with pixels in chunky format */
-		if(SDL_LockSurface(surface) == 1)
+		if(SDL_LockSurface(surface) != 0)
 		{
 		    fprintf(stderr, "Cannot lock the surface!\n");
 		    return FALSE;
@@ -128,7 +125,7 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
 	    if(image->body != NULL)
 	    {
 		/* Populate the surface with pixels in RGB format */
-		if(SDL_LockSurface(surface) == 1)
+		if(SDL_LockSurface(surface) != 0)
 		{
 		    fprintf(stderr, "Cannot lock the surface!\n");
 		    return FALSE;
@@ -160,7 +157,7 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
 	    if(image->body != NULL)
 	    {
 		/* Populate the surface with pixels in chunky format */
-		if(SDL_LockSurface(surface) == 1)
+		if(SDL_LockSurface(surface) != 0)
 		{
 		    fprintf(stderr, "Cannot lock the surface!\n");
 		    return FALSE;
@@ -179,7 +176,7 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
 	    /* Populate the surface with pixels in RGB format */
 	    if(image->body != NULL)
 	    {
-		if(SDL_LockSurface(surface) == 1)
+		if(SDL_LockSurface(surface) != 0)
 		{
 		    fprintf(stderr, "Cannot lock the surface!\n");
 		    return FALSE;
@@ -226,7 +223,7 @@ SDL_Surface *SDL_ILBM_generateSurfaceFromScreen(const ILBM_Image *image, amiVide
 	height = screen->correctedFormat.height;
     }
 
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, 0, 0, 0, 0);
+    surface = SDL_CreateRGBSurface(0, width, height, depth, 0, 0, 0, 0);
     
     /* Set the output format pointers */
     

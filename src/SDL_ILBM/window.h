@@ -33,10 +33,13 @@ typedef struct SDL_ILBM_Window SDL_ILBM_Window;
 
 struct SDL_ILBM_Window
 {
+    const char *title;
     const ILBM_Image *image;
     const amiVideo_Screen *screen;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
     SDL_Surface *pictureSurface;
-    SDL_Surface *windowSurface;
+    SDL_Texture *windowTexture;
     int width;
     int height;
     Sint16 xOffset, yOffset;
@@ -45,7 +48,9 @@ struct SDL_ILBM_Window
     unsigned int lowresPixelScaleFactor;
 };
 
-void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const ILBM_Image *image, const amiVideo_Screen *screen, SDL_Surface *pictureSurface, const int fullscreen, const int stretch, const unsigned int lowresPixelScaleFactor);
+void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const char *title, const ILBM_Image *image, const amiVideo_Screen *screen, SDL_Surface *pictureSurface, const int fullscreen, const int stretch, const unsigned int lowresPixelScaleFactor);
+
+void SDL_ILBM_destroyWindow(SDL_ILBM_Window *window);
 
 void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window);
 

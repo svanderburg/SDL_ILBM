@@ -29,20 +29,10 @@ AC_SUBST(LIBAMIVIDEO_CFLAGS)
 AC_SUBST(LIBAMIVIDEO_LIBS)
 
 # Checks for SDL library
-AC_CHECK_PROG([SDL_CONFIG], [sdl-config], [sdl-config])
-
-if test -n "$SDL_CONFIG"; then
-    if test -z "$SDL_CFLAGS"; then
-        SDL_CFLAGS=`$SDL_CONFIG --cflags`
-    fi
-    
-    if test -z "$SDL_LIBS"; then
-        SDL_LIBS=`$SDL_CONFIG --libs`
-    fi
-fi
-
-AC_SUBST(SDL_CFLAGS)
-AC_SUBST(SDL_LIBS)
+SDL2_REQUIRED=2.0.0
+PKG_CHECK_MODULES(SDL2, sdl2 >= $SDL2_REQUIRED)
+AC_SUBST(SDL2_CFLAGS)
+AC_SUBST(SDL2_LIBS)
 
 # Output
 AC_CONFIG_FILES([

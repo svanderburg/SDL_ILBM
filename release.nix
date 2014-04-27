@@ -27,7 +27,7 @@ let
         src = SDL_ILBM;
         inherit version officialRelease;
 
-        buildInputs = [ pkgconfig libiff libilbm libamivideo SDL ];
+        buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
       };
       
     build =
@@ -43,7 +43,7 @@ let
           name = "SDL_ILBM";
           inherit version;
           src = tarball;
-          buildInputs = [ pkgconfig libiff libilbm libamivideo SDL ];
+          buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
         }
       );
   };

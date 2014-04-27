@@ -25,11 +25,15 @@
 #include "window.h"
 #include <stdlib.h>
 
-void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const ILBM_Image *image, const amiVideo_Screen *screen, SDL_Surface *pictureSurface, const int fullscreen, const int stretch, const unsigned int lowresPixelScaleFactor)
+void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const char *title, const ILBM_Image *image, const amiVideo_Screen *screen, SDL_Surface *pictureSurface, const int fullscreen, const int stretch, const unsigned int lowresPixelScaleFactor)
 {
+    window->title = title;
+    window->window = NULL;
+    window->renderer = NULL;
     window->image = image;
     window->screen = screen;
     window->pictureSurface = pictureSurface;
+    window->windowTexture = NULL;
     window->fullscreen = fullscreen;
     window->stretch = stretch;
     window->lowresPixelScaleFactor = lowresPixelScaleFactor;
@@ -39,15 +43,18 @@ void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const ILBM_Image *image, const
     SDL_ILBM_updateWindowSettings(window);
 }
 
+void SDL_ILBM_destroyWindow(SDL_ILBM_Window *window)
+{
+    SDL_DestroyTexture(window->windowTexture);
+    SDL_DestroyRenderer(window->renderer);
+    SDL_DestroyWindow(window->window);
+}
+
 void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window)
 {
-    Uint32 fullscreenFlag;
+    Uint32 fullScreenFlag;
     
-    if(window->fullscreen)
-	fullscreenFlag = SDL_FULLSCREEN;
-    else
-	fullscreenFlag = 0;
-    
+    /* Determine window settings */
     if(window->stretch)
     {
 	window->width = window->image->bitMapHeader->w;
@@ -65,19 +72,72 @@ void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window)
         window->height = amiVideo_calculateCorrectedHeight(window->lowresPixelScaleFactor, window->height, window->screen->viewportMode);
     }
     
-    window->windowSurface = SDL_SetVideoMode(window->width, window->height, 32, SDL_HWPALETTE | SDL_HWSURFACE | SDL_ANYFORMAT | fullscreenFlag);
+    if(window->fullscreen)
+	fullScreenFlag = SDL_WINDOW_FULLSCREEN_DESKTOP;
+    else
+	fullScreenFlag = 0;
+    
+    /* Discard old window */
+    SDL_ILBM_destroyWindow(window);
+    
+    /* Create a new window and renderer */
+    window->window = SDL_CreateWindow(window->title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window->width, window->height, fullScreenFlag);
+    
+    if(window->window == NULL)
+    {
+	fprintf(stderr, "Cannot create window: %s\n", SDL_GetError());
+	return;
+    }
+    
+    window->renderer = SDL_CreateRenderer(window->window, -1, 0);
+    
+    if(window->renderer == NULL)
+    {
+	fprintf(stderr, "Cannot create renderer: %s\n", SDL_GetError());
+	return;
+    }
+    
+    /* Set scaling options */
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    SDL_RenderSetLogicalSize(window->renderer, window->width, window->height);
+    
+    /* Clear the screen */
+    SDL_SetRenderDrawColor(window->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(window->renderer);
+    
+    /* Configure window texture */
+    window->windowTexture = SDL_CreateTextureFromSurface(window->renderer, window->pictureSurface);
+    
+    if(window->windowTexture == NULL)
+	fprintf(stderr, "Cannot create texture: %s\n", SDL_GetError());
 }
 
 int SDL_ILBM_blitPictureInWindow(SDL_ILBM_Window *window)
 {
-    SDL_Rect dstrect;
-    dstrect.x = -window->xOffset;
-    dstrect.y = -window->yOffset;
+    /* Compose position and clipping rectange */
+    int width = window->pictureSurface->w - window->xOffset;
+    int height = window->pictureSurface->h - window->yOffset;
+    SDL_Rect srcrect;
     
-    if(SDL_BlitSurface(window->pictureSurface, NULL, window->windowSurface, &dstrect) == -1)
-	return FALSE;
-    else
+    if(width > window->width)
+        width = window->width;
+    
+    if(height > window->height)
+        height = window->height;
+    
+    srcrect.x = window->xOffset;
+    srcrect.y = window->yOffset;
+    srcrect.w = width;
+    srcrect.h = height;
+    
+    /* Render the texture */
+    if(SDL_RenderCopy(window->renderer, window->windowTexture, &srcrect, NULL) == 0)
 	return TRUE;
+    else
+    {
+	fprintf(stderr, "Render copy failed: %s\n", SDL_GetError());
+	return FALSE;
+    }
 }
 
 int SDL_ILBM_toggleWindowFullscreen(SDL_ILBM_Window *window)
