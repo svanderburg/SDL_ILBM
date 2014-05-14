@@ -39,6 +39,7 @@ struct SDL_ILBM_Window
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Surface *pictureSurface;
+    SDL_Surface *windowSurface;
     SDL_Texture *windowTexture;
     int width;
     int height;

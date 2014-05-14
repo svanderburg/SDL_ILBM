@@ -45,6 +45,7 @@ void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const char *title, const ILBM_
 
 void SDL_ILBM_destroyWindow(SDL_ILBM_Window *window)
 {
+    SDL_FreeSurface(window->windowSurface);
     SDL_DestroyTexture(window->windowTexture);
     SDL_DestroyRenderer(window->renderer);
     SDL_DestroyWindow(window->window);
@@ -80,6 +81,23 @@ void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window)
     /* Discard old window */
     SDL_ILBM_destroyWindow(window);
     
+    
+    if(window->pictureSurface->format->BytesPerPixel == 4)
+	window->windowSurface = NULL;
+    else
+    {
+	/* For non-RGB surfaces, we need to create a window surface stores the pixels
+	 * of the picture in the same format as the texture that is rendered to the
+	 * screen, because it cannot be converted automatically.
+	 */
+	window->windowSurface = SDL_CreateRGBSurface(0, window->pictureSurface->w, window->pictureSurface->h, 32, 0, 0, 0, 0);
+        if(window->windowSurface == NULL)
+	{
+	    fprintf(stderr, "Cannot create window surface: %s\n", SDL_GetError());
+	    return;
+	}
+    }
+    
     /* Create a new window and renderer */
     window->window = SDL_CreateWindow(window->title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window->width, window->height, fullScreenFlag);
     
@@ -106,7 +124,7 @@ void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window)
     SDL_RenderClear(window->renderer);
     
     /* Configure window texture */
-    window->windowTexture = SDL_CreateTextureFromSurface(window->renderer, window->pictureSurface);
+    window->windowTexture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, window->pictureSurface->w, window->pictureSurface->h);
     
     if(window->windowTexture == NULL)
 	fprintf(stderr, "Cannot create texture: %s\n", SDL_GetError());
@@ -114,6 +132,10 @@ void SDL_ILBM_updateWindowSettings(SDL_ILBM_Window *window)
 
 int SDL_ILBM_blitPictureInWindow(SDL_ILBM_Window *window)
 {
+    void *pixels;
+    int pitch;
+    SDL_Surface *convertSurface;
+    
     /* Compose position and clipping rectange */
     int width = window->pictureSurface->w - window->xOffset;
     int height = window->pictureSurface->h - window->yOffset;
@@ -129,6 +151,27 @@ int SDL_ILBM_blitPictureInWindow(SDL_ILBM_Window *window)
     srcrect.y = window->yOffset;
     srcrect.w = width;
     srcrect.h = height;
+
+    /* Determine whether the picture surface can be converted to a texture directly */
+    if(window->windowSurface == NULL)
+	convertSurface = window->pictureSurface;
+    else
+    {
+	/* Convert the picture surface's format to the window surface format by blitting it */
+	if(SDL_BlitSurface(window->pictureSurface, NULL, window->windowSurface, NULL) < 0)
+	    fprintf(stderr, "Cannot picture blit surface on window surface: %s\n", SDL_GetError());
+	
+	convertSurface = window->windowSurface;
+    }
+    
+    /* Transfer the window surface's pixels to the texture that is rendered on the screen */
+    if(SDL_LockTexture(window->windowTexture, NULL, &pixels, &pitch) < 0)
+	fprintf(stderr, "Cannot lock texture: %s\n", SDL_GetError());
+	
+    if(SDL_ConvertPixels(convertSurface->w, convertSurface->h, convertSurface->format->format, convertSurface->pixels, convertSurface->pitch, SDL_PIXELFORMAT_RGBA8888, pixels, pitch) < 0)
+	fprintf(stderr, "Cannot convert pixels: %s\n", SDL_GetError());
+
+    SDL_UnlockTexture(window->windowTexture);
     
     /* Render the texture */
     if(SDL_RenderCopy(window->renderer, window->windowTexture, &srcrect, NULL) == 0)
