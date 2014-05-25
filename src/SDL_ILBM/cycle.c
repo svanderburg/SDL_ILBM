@@ -79,17 +79,17 @@ static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycl
 
 static Uint32 computeColorRangeTime(const Uint32 ticks, const ILBM_ColorRange *colorRange)
 {
-    return 1000 / (60.0 * colorRange->rate / ILBM_COLORRANGE_60_STEPS_PER_SECOND) + ticks;
+    return (Uint32)(1000 / (60.0 * colorRange->rate / ILBM_COLORRANGE_60_STEPS_PER_SECOND) + ticks);
 }
 
 static Uint32 computeDRangeTime(const Uint32 ticks, const ILBM_DRange *drange)
 {
-    return 1000 / (60.0 * drange->rate / ILBM_DRANGE_60_STEPS_PER_SECOND) + ticks;
+    return (Uint32)(1000 / (60.0 * drange->rate / ILBM_DRANGE_60_STEPS_PER_SECOND) + ticks);
 }
 
 static Uint32 computeCycleInfoTime(const Uint32 ticks, const ILBM_CycleInfo *cycleInfo)
 {
-    return 1000 * cycleInfo->seconds + cycleInfo->microSeconds / 1000 + ticks;
+    return (Uint32)(1000 * cycleInfo->seconds + cycleInfo->microSeconds / 1000 + ticks);
 }
 
 void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image)

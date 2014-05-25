@@ -33,6 +33,7 @@ void SDL_ILBM_initWindow(SDL_ILBM_Window *window, const char *title, const ILBM_
     window->image = image;
     window->screen = screen;
     window->pictureSurface = pictureSurface;
+    window->windowSurface = NULL;
     window->windowTexture = NULL;
     window->fullscreen = fullscreen;
     window->stretch = stretch;
