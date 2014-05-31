@@ -44,27 +44,28 @@ let
           inherit version;
           src = tarball;
           buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
+          CFLAGS = "-ansi -pedantic -Wall";
         }
       )) //
       (pkgs.lib.optionalAttrs (buildForWindows) { i686-windows =
-           let
-             libiff = libiffJobset.build.i686-windows;
-             libilbm = libilbmJobset.build.i686-windows;
-             libamivideo = libamivideoJobset.build.i686-windows;
-             SDL2devel = pkgs.stdenv.mkDerivation {
-               name = "SDL2-devel-2.0.3";
-               src = pkgs.fetchurl {
-                 url = http://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip;
-                 sha256 = "0q6fs678i59xycjlw7blp949dl0p2f1y914prpbs1cspz98x3pld";
-               };
-               buildInputs = [ pkgs.unzip ];
-               installPhase = ''
-                 mkdir -p $out
-                 mv * $out
-               '';
-               dontStrip = true;
+         let
+           libiff = libiffJobset.build.i686-windows;
+           libilbm = libilbmJobset.build.i686-windows;
+           libamivideo = libamivideoJobset.build.i686-windows;
+           SDL2devel = pkgs.stdenv.mkDerivation {
+             name = "SDL2-devel-2.0.3";
+             src = pkgs.fetchurl {
+               url = http://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip;
+               sha256 = "0q6fs678i59xycjlw7blp949dl0p2f1y914prpbs1cspz98x3pld";
              };
-           in
+             buildInputs = [ pkgs.unzip ];
+             installPhase = ''
+               mkdir -p $out
+               mv * $out
+             '';
+             dontStrip = true;
+           };
+         in
            pkgs.dotnetenv.buildSolution {
              name = "SDL_ILBM";
              src = ./.;
@@ -75,7 +76,6 @@ let
                export msBuildOpts="$msBuildOpts /p:libilbmIncludePath=\"$(cygpath --windows ${libilbm}/include)\" /p:libilbmLibPath=\"$(cygpath --windows ${libilbm})\""
                export msBuildOpts="$msBuildOpts /p:libamivideoIncludePath=\"$(cygpath --windows ${libamivideo}/include)\" /p:libamivideoLibPath=\"$(cygpath --windows ${libamivideo})\""
                export msBuildOpts="$msBuildOpts /p:SDL2IncludePath=\"$(cygpath --windows ${SDL2devel}/include)\" /p:SDL2LibPath=\"$(cygpath --windows ${SDL2devel}/lib/x86)\""
-               echo $msBuildOpts
              '';
              postInstall = ''
                mkdir -p $out/include/SDL_ILBM
