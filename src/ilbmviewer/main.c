@@ -22,7 +22,10 @@
  * Sander van der Burg <svanderburg@gmail.com>
  */
  
+#ifndef _MSC_VER
 #include <getopt.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -32,17 +35,122 @@ static void printUsage(const char *command)
 {
     fprintf(stderr, "Usage:\n");
     fprintf(stderr, "%s [options] file.ILBM\n", command);
+
+#ifdef _MSC_VER
+	fprintf(stderr, "/f    Specify the output format. Possible values are: auto, chunky or rgb. Defaults to: auto\n");
+	fprintf(stderr, "/C    Turn cycle mode on by default\n");
+	fprintf(stderr, "/s    Do not clip the picture inside the page but stretch it to its full size\n");\
+	fprintf(stderr, "/c    Specifies the scale factor of a lowres pixel to properly correct its aspect ratio. Possible values are: auto, none, 2, 4\n");
+	fprintf(stderr, "/F    Views the picture in full screen\n");
+	fprintf(stderr, "/n    Displays the n-th picture inside the IFF scrap file. Defaults to: 0\n");
+#else
     fprintf(stderr, "-f,--format         Specify the output format. Possible values are: auto, chunky or rgb. Defaults to: auto\n");
     fprintf(stderr, "-C,--cyle           Turn cycle mode on by default\n");
     fprintf(stderr, "-s,--stretch        Do not clip the picture inside the page but stretch it to its full size\n");\
     fprintf(stderr, "-c,--correct-aspect Specifies the scale factor of a lowres pixel to properly correct its aspect ratio. Possible values are: auto, none, 2, 4\n");
     fprintf(stderr, "-F,--fullscreen     Views the picture in full screen\n");
     fprintf(stderr, "-n,--number         Displays the n-th picture inside the IFF scrap file. Defaults to: 0\n");
+#endif
+}
+
+static SDL_ILBM_Format determineFormat(const char *format)
+{
+	if (strcmp(format, "auto") == 0)
+		return SDL_ILBM_FORMAT_AUTO;
+	else if (strcmp(format, "chunky") == 0)
+		return SDL_ILBM_FORMAT_CHUNKY;
+	else if (strcmp(format, "rgb") == 0)
+		return SDL_ILBM_FORMAT_RGB;
+	else
+		return SDL_ILBM_FORMAT_AUTO;
+}
+
+static unsigned int determineLowresPixelScaleFactor(const char *factor)
+{
+	if (strcmp(factor, "auto") == 0)
+		return 0;
+	else if (strcmp(factor, "none") == 0)
+		return 1;
+	else if (strcmp(factor, "2") == 0)
+		return 2;
+	else if (strcmp(factor, "4") == 0)
+		return 4;
+	else
+		return 0;
 }
 
 int main(int argc, char *argv[])
 {
-    /* Declarations */
+	SDL_ILBM_Format format = SDL_ILBM_FORMAT_AUTO;
+	unsigned int lowresPixelScaleFactor = 0;
+	unsigned int number = 0;
+	unsigned int options = 0;
+
+#ifdef _MSC_VER
+	unsigned int optind = 1;
+	unsigned int i; 
+
+	int formatFollows = FALSE;
+	int lowresPixelScaleFactorFollows = FALSE;
+	int numberFollows = FALSE;
+
+	for (i = 1; i < argc; i++)
+	{
+		if (formatFollows)
+		{
+			formatFollows = FALSE;
+			format = determineFormat(argv[i]);
+			optind++;
+		}
+		else if (lowresPixelScaleFactorFollows)
+		{
+			lowresPixelScaleFactorFollows = FALSE;
+			lowresPixelScaleFactor = determineLowresPixelScaleFactor(argv[i]);
+			optind++;
+		}
+		else if (numberFollows)
+		{
+			numberFollows = FALSE;
+			number = atoi(argv[i]);
+			optind++;
+		}
+		else if (strcmp(argv[i], "/f") == 0)
+		{
+			formatFollows = TRUE;
+			optind++;
+		}
+		else if(strcmp(argv[i], "/C") == 0)
+		{
+			options |= SDL_ILBM_OPTION_CYCLE;
+			optind++;
+		}
+		else if(strcmp(argv[i], "/s") == 0)
+		{
+			options |= SDL_ILBM_OPTION_STRETCH;
+			optind++;
+		}
+		else if (strcmp(argv[i], "/c") == 0)
+		{
+			lowresPixelScaleFactorFollows = TRUE;
+			optind++;
+		}
+		else if (strcmp(argv[i], "/F") == 0)
+		{
+			options |= SDL_ILBM_OPTION_FULLSCREEN;
+			optind++;
+		}
+		else if (strcmp(argv[i], "/n") == 0)
+		{
+			numberFollows = TRUE;
+			optind++;
+		}
+		else if (strcmp(argv[i], "/?") == 0)
+		{
+			printUsage(argv[0]);
+			return 0;
+		}  
+	}
+#else
     int c, option_index = 0;
     struct option long_options[] =
     {
@@ -56,28 +164,13 @@ int main(int argc, char *argv[])
 	{0, 0, 0, 0}
     };
 
-    SDL_ILBM_Format format = SDL_ILBM_FORMAT_AUTO;
-    unsigned int lowresPixelScaleFactor = 0;
-    unsigned int number = 0;
-    unsigned int options = 0;
-    
     /* Parse command-line options */
     while((c = getopt_long(argc, argv, "f:Csc:Fn:h", long_options, &option_index)) != -1)
     {
 	switch(c)
 	{
 	    case 'f':
-		if(strcmp(optarg, "auto") == 0)
-		    format = SDL_ILBM_FORMAT_AUTO;
-		else if(strcmp(optarg, "chunky") == 0)
-		    format = SDL_ILBM_FORMAT_CHUNKY;
-		else if(strcmp(optarg, "rgb") == 0)
-		    format = SDL_ILBM_FORMAT_RGB;
-		else
-		{
-		    fprintf(stderr, "Unknown format: %s\n", optarg);
-		    return 1;
-		}
+			format = determineFormat(optarg);
 		break;
 	    case 'C':
 		options |= SDL_ILBM_OPTION_CYCLE;
@@ -86,19 +179,7 @@ int main(int argc, char *argv[])
 		options |= SDL_ILBM_OPTION_STRETCH;
 		break;
 	    case 'c':
-		if(strcmp(optarg, "auto") == 0)
-		    lowresPixelScaleFactor = 0;
-		else if(strcmp(optarg, "none") == 0)
-		    lowresPixelScaleFactor = 1;
-		else if(strcmp(optarg, "2") == 0)
-		    lowresPixelScaleFactor = 2;
-		else if(strcmp(optarg, "4") == 0)
-		    lowresPixelScaleFactor = 4;
-		else
-		{
-		    fprintf(stderr, "Unknown scale factor: %s\n", optarg);
-		    return 1;
-		}
+			lowresPixelScaleFactor = determineLowresPixelScaleFactor(optarg);
 		break;
 	    case 'F':
 		options |= SDL_ILBM_OPTION_FULLSCREEN;
@@ -112,14 +193,15 @@ int main(int argc, char *argv[])
 		return 0;
 	}
     }
-    
+#endif
+
     /* Validate non options */
     
-    if(optind >= argc)
-    {
-	fprintf(stderr, "ERROR: No ILBM file given!\n");
-	return 1;
-    }
-    else
-	return SDL_ILBM_viewILBMImages(argv[optind], format, number, lowresPixelScaleFactor, options);
+	if (optind >= argc)
+	{
+		fprintf(stderr, "ERROR: No ILBM file given!\n");
+		return 1;
+	}
+	else
+		return SDL_ILBM_viewILBMImages(argv[optind], format, number, lowresPixelScaleFactor, options);
 }

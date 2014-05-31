@@ -5,7 +5,6 @@
 , libamivideoJobset ? import ../libamivideo/release.nix { inherit nixpkgs systems officialRelease; }
 , SDL_ILBM ? { outPath = ./.; rev = 1234; }
 , officialRelease ? false
-
 }:
 
 let
@@ -31,7 +30,7 @@ let
       };
       
     build =
-      pkgs.lib.genAttrs systems (system:
+      (pkgs.lib.genAttrs systems (system:
         with import nixpkgs { inherit system; };
         
         let
@@ -45,7 +44,44 @@ let
           src = tarball;
           buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
         }
-      );
+      )) //
+      ({ i686-windows =
+           let
+             libiff = libiffJobset.build.i686-windows;
+             libilbm = libilbmJobset.build.i686-windows;
+             libamivideo = libamivideoJobset.build.i686-windows;
+             SDL2devel = pkgs.stdenv.mkDerivation {
+               name = "SDL2-devel-2.0.3";
+               src = pkgs.fetchurl {
+                 url = http://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip;
+                 sha256 = "0q6fs678i59xycjlw7blp949dl0p2f1y914prpbs1cspz98x3pld";
+               };
+               buildInputs = [ pkgs.unzip ];
+               installPhase = ''
+                 mkdir -p $out
+                 mv * $out
+               '';
+               dontStrip = true;
+             };
+           in
+           pkgs.dotnetenv.buildSolution {
+             name = "SDL_ILBM";
+             src = ./.;
+             baseDir = "src";
+             slnFile = "SDL_ILBM.sln";
+             preBuild = ''
+               export msBuildOpts="/p:libiffIncludePath=\"$(cygpath --windows ${libiff}/include)\" /p:libiffLibPath=\"$(cygpath --windows ${libiff})\""
+               export msBuildOpts="$msBuildOpts /p:libilbmIncludePath=\"$(cygpath --windows ${libilbm}/include)\" /p:libilbmLibPath=\"$(cygpath --windows ${libilbm})\""
+               export msBuildOpts="$msBuildOpts /p:libamivideoIncludePath=\"$(cygpath --windows ${libamivideo}/include)\" /p:libamivideoLibPath=\"$(cygpath --windows ${libamivideo})\""
+               export msBuildOpts="$msBuildOpts /p:SDL2IncludePath=\"$(cygpath --windows ${SDL2devel}/include)\" /p:SDL2LibPath=\"$(cygpath --windows ${SDL2devel}/lib/x86)\""
+               echo $msBuildOpts
+             '';
+             postInstall = ''
+               mkdir -p $out/include/SDL_ILBM
+               cp -v SDL_ILBM/*.h $out/include/SDL_ILBM
+             '';
+           };
+        });
   };
 in
 jobs

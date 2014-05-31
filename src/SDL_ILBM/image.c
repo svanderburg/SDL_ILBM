@@ -24,6 +24,7 @@
 
 #include "image.h"
 #include <stdlib.h>
+#include <string.h>
 #include <SDL.h>
 #include <libilbm/interleave.h>
 #include <libilbm/byterun.h>

@@ -1,0 +1,22 @@
+LIBRARY SDL_ILBM
+EXPORTS
+	SDL_ILBM_initRangeTimes
+	SDL_ILBM_cleanupRangeTimes
+	SDL_ILBM_shiftActiveRanges
+	SDL_ILBM_initPaletteFromImage
+	SDL_ILBM_extractViewportModeFromImage
+	SDL_ILBM_initScreenFromImage
+	SDL_ILBM_setPalette
+	SDL_ILBM_convertScreenPixelsToSurfacePixels
+	SDL_ILBM_generateSurfaceFromScreen
+	SDL_ILBM_initWindow
+	SDL_ILBM_destroyWindow
+	SDL_ILBM_updateWindowSettings
+	SDL_ILBM_blitPictureInWindow
+	SDL_ILBM_toggleWindowFullscreen
+	SDL_ILBM_toggleWindowStretch
+	SDL_ILBM_scrollWindowLeft
+	SDL_ILBM_scrollWindowRight
+	SDL_ILBM_scrollWindowUp
+	SDL_ILBM_scrollWindowDown
+
