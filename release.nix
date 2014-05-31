@@ -1,10 +1,11 @@
 { nixpkgs ? <nixpkgs>
 , systems ? [ "i686-linux" "x86_64-linux" ]
-, libiffJobset ? import ../libiff/release.nix { inherit nixpkgs systems officialRelease; }
-, libilbmJobset ? import ../libilbm/release.nix { inherit nixpkgs systems officialRelease; }
-, libamivideoJobset ? import ../libamivideo/release.nix { inherit nixpkgs systems officialRelease; }
+, libiffJobset ? import ../libiff/release.nix { inherit nixpkgs systems officialRelease buildForWindows; }
+, libilbmJobset ? import ../libilbm/release.nix { inherit nixpkgs systems officialRelease buildForWindows; }
+, libamivideoJobset ? import ../libamivideo/release.nix { inherit nixpkgs systems officialRelease buildForWindows; }
 , SDL_ILBM ? { outPath = ./.; rev = 1234; }
 , officialRelease ? false
+, buildForWindows ? false
 }:
 
 let
@@ -45,7 +46,7 @@ let
           buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
         }
       )) //
-      ({ i686-windows =
+      (pkgs.lib.optionalAttrs (buildForWindows) { i686-windows =
            let
              libiff = libiffJobset.build.i686-windows;
              libilbm = libilbmJobset.build.i686-windows;
