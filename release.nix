@@ -13,6 +13,20 @@ let
   
   version = builtins.readFile ./version;
   
+  SDL2devel = pkgs.stdenv.mkDerivation {
+    name = "SDL2-devel-2.0.3";
+    src = pkgs.fetchurl {
+      url = http://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip;
+      sha256 = "0q6fs678i59xycjlw7blp949dl0p2f1y914prpbs1cspz98x3pld";
+    };
+    buildInputs = [ pkgs.unzip ];
+    installPhase = ''
+      mkdir -p $out
+      mv * $out
+    '';
+    dontStrip = true;
+  };
+  
   jobs = rec {
     tarball =
       with pkgs;
@@ -47,42 +61,49 @@ let
           CFLAGS = "-ansi -pedantic -Wall";
         }
       )) //
-      (pkgs.lib.optionalAttrs (buildForWindows) { i686-windows =
-         let
-           libiff = libiffJobset.build.i686-windows;
-           libilbm = libilbmJobset.build.i686-windows;
-           libamivideo = libamivideoJobset.build.i686-windows;
-           SDL2devel = pkgs.stdenv.mkDerivation {
-             name = "SDL2-devel-2.0.3";
-             src = pkgs.fetchurl {
-               url = http://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip;
-               sha256 = "0q6fs678i59xycjlw7blp949dl0p2f1y914prpbs1cspz98x3pld";
-             };
-             buildInputs = [ pkgs.unzip ];
-             installPhase = ''
-               mkdir -p $out
-               mv * $out
-             '';
-             dontStrip = true;
-           };
-         in
-           pkgs.dotnetenv.buildSolution {
-             name = "SDL_ILBM";
-             src = ./.;
-             baseDir = "src";
-             slnFile = "SDL_ILBM.sln";
-             preBuild = ''
-               export msBuildOpts="/p:libiffIncludePath=\"$(cygpath --windows ${libiff}/include)\" /p:libiffLibPath=\"$(cygpath --windows ${libiff})\""
-               export msBuildOpts="$msBuildOpts /p:libilbmIncludePath=\"$(cygpath --windows ${libilbm}/include)\" /p:libilbmLibPath=\"$(cygpath --windows ${libilbm})\""
-               export msBuildOpts="$msBuildOpts /p:libamivideoIncludePath=\"$(cygpath --windows ${libamivideo}/include)\" /p:libamivideoLibPath=\"$(cygpath --windows ${libamivideo})\""
-               export msBuildOpts="$msBuildOpts /p:SDL2IncludePath=\"$(cygpath --windows ${SDL2devel}/include)\" /p:SDL2LibPath=\"$(cygpath --windows ${SDL2devel}/lib/x86)\""
-             '';
-             postInstall = ''
-               mkdir -p $out/include/SDL_ILBM
-               cp -v SDL_ILBM/*.h $out/include/SDL_ILBM
-             '';
-           };
-        });
+      (pkgs.lib.optionalAttrs (buildForWindows) {
+        i686-windows =
+          let
+            libiff = libiffJobset.build.i686-windows;
+            libilbm = libilbmJobset.build.i686-windows;
+            libamivideo = libamivideoJobset.build.i686-windows;
+          in
+            pkgs.dotnetenv.buildSolution {
+              name = "SDL_ILBM";
+              src = ./.;
+              baseDir = "src";
+              slnFile = "SDL_ILBM.sln";
+              preBuild = ''
+                export msBuildOpts="/p:libiffIncludePath=\"$(cygpath --windows ${libiff}/include)\" /p:libiffLibPath=\"$(cygpath --windows ${libiff})\""
+                export msBuildOpts="$msBuildOpts /p:libilbmIncludePath=\"$(cygpath --windows ${libilbm}/include)\" /p:libilbmLibPath=\"$(cygpath --windows ${libilbm})\""
+                export msBuildOpts="$msBuildOpts /p:libamivideoIncludePath=\"$(cygpath --windows ${libamivideo}/include)\" /p:libamivideoLibPath=\"$(cygpath --windows ${libamivideo})\""
+                export msBuildOpts="$msBuildOpts /p:SDL2IncludePath=\"$(cygpath --windows ${SDL2devel}/include)\" /p:SDL2LibPath=\"$(cygpath --windows ${SDL2devel}/lib/x86)\""
+              '';
+              postInstall = ''
+                mkdir -p $out/include/SDL_ILBM
+                cp -v SDL_ILBM/*.h $out/include/SDL_ILBM
+              '';
+            };
+      });
   };
 in
-jobs
+jobs // (pkgs.stdenv.lib.optionalAttrs (buildForWindows) {
+  windist = 
+    let
+      libiff = libiffJobset.build.i686-windows;
+      libilbm = libilbmJobset.build.i686-windows;
+      libamivideo = libamivideoJobset.build.i686-windows;
+      SDL_ILBM = jobs.build.i686-windows;
+    in
+    pkgs.stdenv.mkDerivation {
+      name = "SDL_ILBM-windist";
+      buildCommand = ''
+        mkdir -p $out
+        cp ${libiff}/{*.exe,*.dll} $out
+        cp ${libilbm}/{*.exe,*.dll} $out
+        cp ${libamivideo}/{*.exe,*.dll} $out
+        cp ${SDL2devel}/lib/x86/*.dll $out
+        cp ${SDL_ILBM}/{*.exe,*.dll} $out
+      '';
+    };
+})
