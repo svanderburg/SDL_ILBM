@@ -54,7 +54,7 @@ amiVideo_ULong SDL_ILBM_extractViewportModeFromImage(const ILBM_Image *image)
     return paletteFlags | resolutionFlags;
 }
 
-IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen)
+void SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen)
 {
     /* Determine which viewport mode is best for displaying the image */
     IFF_Long viewportMode = SDL_ILBM_extractViewportModeFromImage(image);
@@ -69,35 +69,14 @@ IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *scre
     ILBM_unpackByteRun(image);
     
     if(ILBM_imageIsPBM(image))
-    {
         amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, (amiVideo_UByte*)image->body->chunkData, image->bitMapHeader->w); /* A PBM has chunky pixels in its body */
-        return NULL;
-    }
     else if(ILBM_imageIsACBM(image))
-    {
-        /* Set bitplane pointers of the conversion screen */
-        amiVideo_setScreenBitplanes(screen, (amiVideo_UByte*)image->bitplanes->chunkData);
-
-        return NULL;
-    }
+        amiVideo_setScreenBitplanes(screen, (amiVideo_UByte*)image->bitplanes->chunkData); /* Set bitplane pointers of the conversion screen */
     else if(ILBM_imageIsILBM(image))
     {
-        /* Amiga ILBM image has interleaved scanlines per bitplane. We have to deinterleave it in order to be able to convert it */
-        IFF_UByte *bitplanes = ILBM_deinterleave(image);
-        
-        if(bitplanes == NULL)
-            return NULL;
-        else
-        {
-            /* Set bitplane pointers of the conversion screen */
-            amiVideo_setScreenBitplanes(screen, bitplanes);
-        
-            /* Return deinterleaved bitplanes */
-            return bitplanes;
-        }
+        if(ILBM_convertILBMToACBM(image)) /* Amiga ILBM image has interleaved scanlines per bitplane. We have to deinterleave it in order to be able to convert it */
+            amiVideo_setScreenBitplanes(screen, (amiVideo_UByte*)image->bitplanes->chunkData); /* Set bitplane pointers of the conversion screen */
     }
-    else
-        return NULL;
 }
 
 int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette)

@@ -70,7 +70,7 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     int cycle, fullscreen, stretch;
     
     /* Initialize conversion screen */
-    IFF_UByte *bitplanes = SDL_ILBM_initScreenFromImage(image, &screen);
+    SDL_ILBM_initScreenFromImage(image, &screen);
     
     /* Auto select lowres pixel scale factor, if needed */
     if(lowresPixelScaleFactor == 0)
@@ -214,7 +214,6 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     SDL_ILBM_cleanupRangeTimes(&rangeTimes);
     SDL_FreeSurface(pictureSurface);
     amiVideo_cleanupScreen(&screen);
-    free(bitplanes);
     SDL_ILBM_destroyWindow(&window);
     
     /* Return exit status */

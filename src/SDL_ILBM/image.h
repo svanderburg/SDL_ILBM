@@ -42,7 +42,7 @@ void SDL_ILBM_initPaletteFromImage(const ILBM_Image *image, amiVideo_Palette *pa
 
 amiVideo_ULong SDL_ILBM_extractViewportModeFromImage(const ILBM_Image *image);
 
-IFF_UByte *SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen);
+void SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen);
 
 int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette);
 
