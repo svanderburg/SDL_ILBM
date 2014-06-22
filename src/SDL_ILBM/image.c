@@ -33,7 +33,12 @@
 void SDL_ILBM_initPaletteFromImage(const ILBM_Image *image, amiVideo_Palette *palette)
 {
     if(image->colorMap == NULL)
-        amiVideo_setBitplanePaletteColors(palette, NULL, 0); /* If no colormap is provided, set the palette to 0 */
+    {
+        /* If no colormap is provided by the image, use a generated grayscale one */
+        ILBM_ColorMap *colorMap = ILBM_generateGrayscaleColorMap(image);
+        amiVideo_setBitplanePaletteColors(palette, (amiVideo_Color*)colorMap->colorRegister, colorMap->colorRegisterLength);
+        free(colorMap);
+    }
     else
         amiVideo_setBitplanePaletteColors(palette, (amiVideo_Color*)image->colorMap->colorRegister, image->colorMap->colorRegisterLength);
 }
