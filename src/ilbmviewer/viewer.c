@@ -47,12 +47,12 @@ static int updatePaletteAndSurface(amiVideo_Screen *screen, const ILBM_Image *im
 {
     if(format == SDL_ILBM_FORMAT_CHUNKY)
     {
-	/* Switch palette colors for chunky graphics which can be done quite efficiently */
-	amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-	SDL_ILBM_setPalette(pictureSurface, &screen->palette);
+        /* Switch palette colors for chunky graphics which can be done quite efficiently */
+        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+        SDL_ILBM_setPalette(pictureSurface, &screen->palette);
     }
     else
-	SDL_ILBM_convertScreenPixelsToSurfacePixels(image, screen, pictureSurface, format, lowresPixelScaleFactor); /* Do the complete conversion cycle which is more work */
+        SDL_ILBM_convertScreenPixelsToSurfacePixels(image, screen, pictureSurface, format, lowresPixelScaleFactor); /* Do the complete conversion cycle which is more work */
     
     /* Reblit the picture surface on the window */
     return SDL_ILBM_blitPictureInWindow(window);
@@ -74,15 +74,15 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     
     /* Auto select lowres pixel scale factor, if needed */
     if(lowresPixelScaleFactor == 0)
-	realLowresPixelScaleFactor = amiVideo_autoSelectLowresPixelScaleFactor(screen.viewportMode);
+        realLowresPixelScaleFactor = amiVideo_autoSelectLowresPixelScaleFactor(screen.viewportMode);
     else
-	realLowresPixelScaleFactor = lowresPixelScaleFactor;
+        realLowresPixelScaleFactor = lowresPixelScaleFactor;
 
     /* Auto select format, if needed */
     if(format == SDL_ILBM_FORMAT_AUTO)
         realFormat = amiVideo_autoSelectColorFormat(screen.viewportMode);
     else
-	realFormat = format;
+        realFormat = format;
 
     /* Determine fullscreen option */
     if(options & SDL_ILBM_OPTION_FULLSCREEN)
@@ -94,22 +94,22 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     if(options & SDL_ILBM_OPTION_STRETCH)
         stretch = TRUE;
     else
-	stretch = FALSE;
+        stretch = FALSE;
 
     /* Determine whether to cycle */
     if(options & SDL_ILBM_OPTION_CYCLE)
-	cycle = TRUE;
+        cycle = TRUE;
     else
-	cycle = FALSE;
+        cycle = FALSE;
     
     /* Convert the image */
     pictureSurface = SDL_ILBM_generateSurfaceFromScreen(image, &screen, realFormat, realLowresPixelScaleFactor);
     
     if(pictureSurface == NULL)
     {
-	fprintf(stderr, "Cannot generate surface from screen!\n");
-	amiVideo_cleanupScreen(&screen);
-	return SDL_ILBM_STATUS_QUIT;
+        fprintf(stderr, "Cannot generate surface from screen!\n");
+        amiVideo_cleanupScreen(&screen);
+        return SDL_ILBM_STATUS_QUIT;
     }
     
     /* Initialize window */
@@ -120,94 +120,94 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
     
     /* Blit the picture in the window */
     if(!SDL_ILBM_blitPictureInWindow(&window))
-	status = SDL_ILBM_STATUS_QUIT;
+        status = SDL_ILBM_STATUS_QUIT;
 
     /* Main loop taking care of user events */
     while(status == SDL_ILBM_STATUS_NONE)
     {
-	SDL_Event event;
-	
-	while(SDL_PollEvent(&event))
-	{
-	    switch(event.type)
-	    {
-		case SDL_KEYDOWN:
-		    switch(event.key.keysym.sym)
-		    {
-			case SDLK_f:
-				if(!SDL_ILBM_toggleWindowFullscreen(&window))
-				    status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_s:
-				if(!SDL_ILBM_toggleWindowStretch(&window))
-				    status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_ESCAPE:
-			    status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_SPACE:
-			case SDLK_PAGEDOWN:
-			    if(number < imagesLength - 1)
-				status = SDL_ILBM_STATUS_NEXT;
-			    break;
-			    
-			case SDLK_PAGEUP:
-			    if(number > 0)
-				status = SDL_ILBM_STATUS_PREVIOUS;
-			    break;
-			
-			case SDLK_TAB:
-			    cycle = !cycle;
-			    
-			    if(!cycle)
-			    {
-				SDL_ILBM_initPaletteFromImage(image, &screen.palette);
-				if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
-				    status = SDL_ILBM_STATUS_QUIT;
-			    }
-			    break;
-			
-			case SDLK_LEFT:
-			    if(!SDL_ILBM_scrollWindowLeft(&window))
-				status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_RIGHT:
-			    if(!SDL_ILBM_scrollWindowRight(&window))
-				status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_UP:
-			    if(!SDL_ILBM_scrollWindowUp(&window))
-				status = SDL_ILBM_STATUS_QUIT;
-			    break;
-			
-			case SDLK_DOWN:
-			    if(!SDL_ILBM_scrollWindowDown(&window))
-				status = SDL_ILBM_STATUS_QUIT;
-			    break;
-		    }
-		    break;
-		    
-		case SDL_QUIT:
-		    status = SDL_ILBM_STATUS_QUIT;
-		    break;
-	    }
-	}
-	
-	/* If cycle mode is enabled, do the work that is needed to switch the colors */
-	if(cycle)
-	{
-	    SDL_ILBM_shiftActiveRanges(&rangeTimes, image, &screen.palette);
-	    if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
-		status = SDL_ILBM_STATUS_QUIT;
-	}
-	
-	/* Flip screen buffers, so that changes become visible */
-	SDL_RenderPresent(window.renderer);
+        SDL_Event event;
+        
+        while(SDL_PollEvent(&event))
+        {
+            switch(event.type)
+            {
+                case SDL_KEYDOWN:
+                    switch(event.key.keysym.sym)
+                    {
+                        case SDLK_f:
+                                if(!SDL_ILBM_toggleWindowFullscreen(&window))
+                                    status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_s:
+                                if(!SDL_ILBM_toggleWindowStretch(&window))
+                                    status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_ESCAPE:
+                            status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_SPACE:
+                        case SDLK_PAGEDOWN:
+                            if(number < imagesLength - 1)
+                                status = SDL_ILBM_STATUS_NEXT;
+                            break;
+                            
+                        case SDLK_PAGEUP:
+                            if(number > 0)
+                                status = SDL_ILBM_STATUS_PREVIOUS;
+                            break;
+                        
+                        case SDLK_TAB:
+                            cycle = !cycle;
+                            
+                            if(!cycle)
+                            {
+                                SDL_ILBM_initPaletteFromImage(image, &screen.palette);
+                                if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
+                                    status = SDL_ILBM_STATUS_QUIT;
+                            }
+                            break;
+                        
+                        case SDLK_LEFT:
+                            if(!SDL_ILBM_scrollWindowLeft(&window))
+                                status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_RIGHT:
+                            if(!SDL_ILBM_scrollWindowRight(&window))
+                                status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_UP:
+                            if(!SDL_ILBM_scrollWindowUp(&window))
+                                status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                        
+                        case SDLK_DOWN:
+                            if(!SDL_ILBM_scrollWindowDown(&window))
+                                status = SDL_ILBM_STATUS_QUIT;
+                            break;
+                    }
+                    break;
+                    
+                case SDL_QUIT:
+                    status = SDL_ILBM_STATUS_QUIT;
+                    break;
+            }
+        }
+        
+        /* If cycle mode is enabled, do the work that is needed to switch the colors */
+        if(cycle)
+        {
+            SDL_ILBM_shiftActiveRanges(&rangeTimes, image, &screen.palette);
+            if(!updatePaletteAndSurface(&screen, image, realFormat, realLowresPixelScaleFactor, pictureSurface, &window))
+                status = SDL_ILBM_STATUS_QUIT;
+        }
+        
+        /* Flip screen buffers, so that changes become visible */
+        SDL_RenderPresent(window.renderer);
     }
     
     /* Cleanup */
@@ -232,9 +232,8 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
     
     if(chunk == NULL)
     {
-	fprintf(stderr, "Error parsing ILBM file!\n");
-	ILBM_free(chunk);
-	return 1;
+        fprintf(stderr, "Error parsing ILBM file!\n");
+        return 1;
     }
     
     /* Extract images */
@@ -243,35 +242,35 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
     /* Check the ILBM file */
     if(!ILBM_checkImages(chunk, images, imagesLength))
     {
-	fprintf(stderr, "ILBM file is not valid!\n");
-	ILBM_freeImages(images, imagesLength);
-	ILBM_free(chunk);
-	return 1;
+        fprintf(stderr, "ILBM file is not valid!\n");
+        ILBM_freeImages(images, imagesLength);
+        ILBM_free(chunk);
+        return 1;
     }
     
     if(imagesLength == 0)
     {
-	fprintf(stderr, "There are no (valid) ILBM images in the IFF file!\n");
-	ILBM_freeImages(images, imagesLength);
-	ILBM_free(chunk);
-	return 1;
+        fprintf(stderr, "There are no (valid) ILBM images in the IFF file!\n");
+        ILBM_freeImages(images, imagesLength);
+        ILBM_free(chunk);
+        return 1;
     }
     
     if(number > imagesLength - 1)
     {
-	fprintf(stderr, "Image with index: %d does not exist. Valid ranges are: 0 - %d\n", number, imagesLength - 1);
-	ILBM_freeImages(images, imagesLength);
-	ILBM_free(chunk);
-	return 1;
+        fprintf(stderr, "Image with index: %d does not exist. Valid ranges are: 0 - %d\n", number, imagesLength - 1);
+        ILBM_freeImages(images, imagesLength);
+        ILBM_free(chunk);
+        return 1;
     }
     
     /* Initialize video subsystem */
     if(SDL_Init(SDL_INIT_VIDEO) == -1)
     {
-	fprintf(stderr, "Error initialising SDL video subsystem, reason: %s\n", SDL_GetError());
-	ILBM_freeImages(images, imagesLength);
-	ILBM_free(chunk);
-	return 1;
+        fprintf(stderr, "Error initialising SDL video subsystem, reason: %s\n", SDL_GetError());
+        ILBM_freeImages(images, imagesLength);
+        ILBM_free(chunk);
+        return 1;
     }
     
     /* Main loop */
@@ -282,12 +281,12 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
         
         switch(status)
         {
-	    case SDL_ILBM_STATUS_PREVIOUS:
-		number--;
-		break;
-	    case SDL_ILBM_STATUS_NEXT:
-		number++;
-		break;
+            case SDL_ILBM_STATUS_PREVIOUS:
+                number--;
+                break;
+            case SDL_ILBM_STATUS_NEXT:
+                number++;
+                break;
         }
     }
     
