@@ -80,7 +80,7 @@ static SDL_ILBM_Status viewILBMImage(ILBM_Image *image, const SDL_ILBM_Format fo
 
     /* Auto select format, if needed */
     if(format == SDL_ILBM_FORMAT_AUTO)
-        realFormat = amiVideo_autoSelectColorFormat(screen.viewportMode);
+        realFormat = amiVideo_autoSelectColorFormat(&screen);
     else
         realFormat = format;
 
