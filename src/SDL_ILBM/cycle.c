@@ -143,7 +143,7 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
     {
 	ILBM_DRange *drange = image->drange[i];
 	
-	if(drange->flags == ILBM_RNG_ACTIVE && ticks >= drngTimes[i])
+	if((drange->flags & ILBM_RNG_ACTIVE) == ILBM_RNG_ACTIVE && ticks >= drngTimes[i])
 	{
 	    shiftDRange(palette, drange);
 	    drngTimes[i] = computeDRangeTime(ticks, drange); /* Update time */
