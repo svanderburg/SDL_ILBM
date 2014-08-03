@@ -244,14 +244,14 @@ SDL_Surface *SDL_ILBM_generateSurfaceFromScreen(const ILBM_Image *image, amiVide
         if(format == SDL_ILBM_FORMAT_CHUNKY)
             amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, surface->pixels, surface->pitch); /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
         else
-            amiVideo_setScreenUncorrectedRGBPixelsPointer(screen, surface->pixels, surface->pitch, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift); /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
+            amiVideo_setScreenUncorrectedRGBPixelsPointer(screen, surface->pixels, surface->pitch, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
     }
     else
     {
         if(format == SDL_ILBM_FORMAT_CHUNKY)
-            amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 1, allocateUncorrectedMemory, 0, 0, 0); /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
+            amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 1, allocateUncorrectedMemory, 0, 0, 0, 0); /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
         else
-            amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 4, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift); /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
+            amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 4, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
     }
     
     /* Convert pixels */
