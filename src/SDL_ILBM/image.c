@@ -140,8 +140,16 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
             
                 if(ILBM_imageIsPBM(image))
                 {
-                    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-                    amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
+                    if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32)
+                    {
+                        memcpy(screen->uncorrectedRGBFormat.pixels, pixelChunk->chunkData, pixelChunk->chunkSize);
+                        amiVideo_reorderRGBPixels(screen);
+                    }
+                    else
+                    {
+                        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+                        amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
+                    }
                 }
                 else
                     amiVideo_convertScreenBitplanesToRGBPixels(screen); /* Convert the bitplanes to RGB pixels */
@@ -193,8 +201,17 @@ int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVide
                 
                 if(ILBM_imageIsPBM(image))
                 {
-                    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-                    amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(screen);
+                    if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32)
+                    {
+                        memcpy(screen->uncorrectedRGBFormat.pixels, pixelChunk->chunkData, pixelChunk->chunkSize);
+                        amiVideo_reorderRGBPixels(screen);
+                        amiVideo_correctScreenPixels(screen);
+                    }
+                    else
+                    {
+                        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+                        amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(screen);
+                    }
                 }
                 else
                     amiVideo_convertScreenBitplanesToCorrectedRGBPixels(screen); /* Convert the bitplanes to corrected RGB pixels */
