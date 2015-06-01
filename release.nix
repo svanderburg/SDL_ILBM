@@ -40,8 +40,9 @@ let
         name = "SDL_ILBM-tarball";
         src = SDL_ILBM;
         inherit version officialRelease;
+        dontBuild = false;
 
-        buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
+        buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 help2man ];
       };
       
     build =

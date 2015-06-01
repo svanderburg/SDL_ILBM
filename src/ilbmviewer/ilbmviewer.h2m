@@ -1,0 +1,40 @@
+[Function keys]
+.RE
+.PP
+While viewing ILBM images, the following function keys can be used:
+.PP
+\fBPAGE UP\fR
+.RS 4
+Displays the previous ILBM image inside the IFF file.
+.RE
+.PP
+\fBPAGE DOWN\fR, \fBSPACE\fR
+.RS 4
+Displays the next ILBM image inside the IFF file.
+.RE
+.PP
+\fBTAB\fR
+.RS 4
+Turns color cycling mode for Deluxe Paint and Graphicraft color ranges on or off
+.RE
+.PP
+\fBF\fR
+.RS 4
+Turns fullscreen mode on or off
+.RE
+.PP
+\fBUP\fR, \fBDOWN\fR, \fBLEFT\fR, \fBRIGHT\fR
+.RS 4
+Changes the horizontal or vertical display offset, if the window page size is smaller than the actual image size
+.RE
+.PP
+\fBS\fR
+.RS 4
+Turns stretch mode on or off. Stretch mode tries to make the window size equal to the actual image size
+.RE
+.PP
+\fBESACPE\fR
+.RS 4
+Quits the viewer
+.RE
+.PP
