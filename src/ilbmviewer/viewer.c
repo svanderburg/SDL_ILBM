@@ -228,7 +228,11 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
     SDL_ILBM_Status status = SDL_ILBM_STATUS_NONE;
     
     /* Open the ILBM file */
-    chunk = ILBM_read(filename);
+    
+    if(filename == NULL)
+        chunk = ILBM_readFd(stdin);
+    else
+        chunk = ILBM_read(filename);
     
     if(chunk == NULL)
     {

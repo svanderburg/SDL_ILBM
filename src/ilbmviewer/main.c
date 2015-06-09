@@ -33,9 +33,10 @@
 
 static void printUsage(const char *command)
 {
-    printf("Usage: %s [OPTION] file.ILBM\n\n", command);
+    printf("Usage: %s [OPTION] [file.ILBM]\n\n", command);
 
-    printf("View a collection of ILBM images inside an IFF file.\n\n");
+    printf("View a collection of ILBM images inside an IFF file. If no ILBM file is given it reads\n");
+    printf("from the standard input.\n\n");
     
     printf("Options:\n");
 #ifdef _MSC_VER
@@ -105,7 +106,8 @@ int main(int argc, char *argv[])
     unsigned int lowresPixelScaleFactor = 0;
     unsigned int number = 0;
     unsigned int options = 0;
-
+    char *filename;
+    
 #ifdef _MSC_VER
     unsigned int optind = 1;
     unsigned int i; 
@@ -227,10 +229,9 @@ int main(int argc, char *argv[])
     /* Validate non options */
     
     if (optind >= argc)
-    {
-        fprintf(stderr, "ERROR: No ILBM file given!\n");
-        return 1;
-    }
+        filename = NULL;
     else
-        return SDL_ILBM_viewILBMImages(argv[optind], format, number, lowresPixelScaleFactor, options);
+        filename = argv[optind];
+        
+    return SDL_ILBM_viewILBMImages(filename, format, number, lowresPixelScaleFactor, options);
 }
