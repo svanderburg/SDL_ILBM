@@ -344,13 +344,16 @@ the PC display.
 
 * By picking `1` as a lowres pixel scale factor, each pixel in the bitplane
   surface translates to a pixel in the converted chunky/RGB surface, breaking
-  the aspect ratio.
+  the aspect ratio for certain kinds of images.
 
 * By picking `2`, we can retain the aspect ratio for lowres and hires images.
-  For example, for a high resolution, non-interlaced image, the amount of
-  scanlines are doubled.
+  For example, a lowres, non-interlaced picture is twice as wide and twice as
+  high as the original image. For a high resolution, non-interlaced image, the
+  amount of scanlines are doubled.
   
-* By picking `4`, we can retain the asepct ratio for super hires images.
+* By picking `4`, we can retain the aspect ratio for super hires images in
+  addition to hires and lowres images. Lowres, non-interlaced images are four
+  time as wide and four times a high as the original.
 
 * By picking `0`, the API attempts to find the smallest lowres pixel scale
   factor that retains the aspect ratio.
