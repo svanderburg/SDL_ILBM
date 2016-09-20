@@ -1,22 +1,45 @@
 LIBRARY SDL_ILBM
 EXPORTS
+	SDL_ILBM_setSurfacePaletteFromScreenPalette
+	SDL_ILBM_createUncorrectedChunkySurfaceFromScreen
+	SDL_ILBM_createUncorrectedRGBSurfaceFromScreen
+	SDL_ILBM_createCorrectedChunkySurfaceFromScreen
+	SDL_ILBM_createCorrectedRGBSurfaceFromScreen
 	SDL_ILBM_initRangeTimes
 	SDL_ILBM_cleanupRangeTimes
 	SDL_ILBM_shiftActiveRanges
+	SDL_ILBM_initDisplay
+	SDL_ILBM_createDisplay
+	SDL_ILBM_destroyDisplay
+	SDL_ILBM_freeDisplay
+	SDL_ILBM_createWindow
+	SDL_ILBM_renderSetLogicalSize
+	SDL_ILBM_createTexture
+	SDL_ILBM_blitDisplayToTexture
+	SDL_ILBM_renderCopy
 	SDL_ILBM_initPaletteFromImage
 	SDL_ILBM_extractViewportModeFromImage
-	SDL_ILBM_initScreenFromImage
-	SDL_ILBM_setPalette
-	SDL_ILBM_convertScreenPixelsToSurfacePixels
-	SDL_ILBM_generateSurfaceFromScreen
-	SDL_ILBM_initWindow
-	SDL_ILBM_destroyWindow
-	SDL_ILBM_updateWindowSettings
-	SDL_ILBM_blitPictureInWindow
-	SDL_ILBM_toggleWindowFullscreen
-	SDL_ILBM_toggleWindowStretch
-	SDL_ILBM_scrollWindowLeft
-	SDL_ILBM_scrollWindowRight
-	SDL_ILBM_scrollWindowUp
-	SDL_ILBM_scrollWindowDown
-
+	SDL_ILBM_attachImageToScreen
+	SDL_ILBM_createSurface
+	SDL_ILBM_initImage
+	SDL_ILBM_createImage
+	SDL_ILBM_blitImageToSurface
+	SDL_ILBM_destroyImage
+	SDL_ILBM_freeImage
+	SDL_ILBM_cycleColors
+	SDL_ILBM_resetColors
+	SDL_ILBM_renderUncorrectedChunkyImage
+	SDL_ILBM_renderUncorrectedRGBImage
+	SDL_ILBM_renderCorrectedChunkyImage
+	SDL_ILBM_renderCorrectedRGBImage
+	SDL_ILBM_initSetFromFilename
+	SDL_ILBM_initSetFromFd
+	SDL_ILBM_initSetFromIFFChunk
+	SDL_ILBM_createSetFromFilename
+	SDL_ILBM_createSetFromFd
+	SDL_ILBM_createSetFromIFFChunk
+	SDL_ILBM_createSurfaceFromSet
+	SDL_ILBM_initImageFromSet
+	SDL_ILBM_createImageFromSet
+	SDL_ILBM_cleanupSet
+	SDL_ILBM_freeSet

@@ -77,13 +77,13 @@ static void printVersion(const char *command)
 static SDL_ILBM_Format determineFormat(const char *format)
 {
     if (strcmp(format, "auto") == 0)
-        return SDL_ILBM_FORMAT_AUTO;
+        return SDL_ILBM_AUTO_FORMAT;
     else if (strcmp(format, "chunky") == 0)
-        return SDL_ILBM_FORMAT_CHUNKY;
+        return SDL_ILBM_CHUNKY_FORMAT;
     else if (strcmp(format, "rgb") == 0)
-        return SDL_ILBM_FORMAT_RGB;
+        return SDL_ILBM_RGB_FORMAT;
     else
-        return SDL_ILBM_FORMAT_AUTO;
+        return SDL_ILBM_AUTO_FORMAT;
 }
 
 static unsigned int determineLowresPixelScaleFactor(const char *factor)
@@ -102,7 +102,7 @@ static unsigned int determineLowresPixelScaleFactor(const char *factor)
 
 int main(int argc, char *argv[])
 {
-    SDL_ILBM_Format format = SDL_ILBM_FORMAT_AUTO;
+    SDL_ILBM_Format format = SDL_ILBM_AUTO_FORMAT;
     unsigned int lowresPixelScaleFactor = 0;
     unsigned int number = 0;
     unsigned int options = 0;

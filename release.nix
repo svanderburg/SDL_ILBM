@@ -43,6 +43,7 @@ let
         dontBuild = false;
 
         buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 help2man ];
+        CFLAGS = "-ansi -pedantic -Wall";
       };
       
     build =

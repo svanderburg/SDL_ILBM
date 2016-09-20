@@ -25,29 +25,54 @@
 #ifndef __SDL_ILBM_IMAGE_H
 #define __SDL_ILBM_IMAGE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct SDL_ILBM_Image SDL_ILBM_Image;
+
 #include <SDL.h>
 #include <libilbm/ilbmimage.h>
 #include <libamivideo/screen.h>
-#include <libamivideo/palette.h>
+#include "cycle.h"
 
 typedef enum
 {
-    SDL_ILBM_FORMAT_AUTO = 0,
-    SDL_ILBM_FORMAT_CHUNKY = 1,
-    SDL_ILBM_FORMAT_RGB = 4
+    SDL_ILBM_AUTO_FORMAT = 0,
+    SDL_ILBM_CHUNKY_FORMAT = 1,
+    SDL_ILBM_RGB_FORMAT = 4
 }
 SDL_ILBM_Format;
 
-void SDL_ILBM_initPaletteFromImage(const ILBM_Image *image, amiVideo_Palette *palette);
+struct SDL_ILBM_Image
+{
+    ILBM_Image *image;
+    amiVideo_Screen screen;
+    SDL_Surface *surface;
+    SDL_ILBM_RangeTimes rangeTimes;
+    int lowresPixelScaleFactor;
+    SDL_ILBM_Format format;
+    int (*updatePaletteAndSurface) (const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
+};
 
-amiVideo_ULong SDL_ILBM_extractViewportModeFromImage(const ILBM_Image *image);
+SDL_Surface *SDL_ILBM_createSurface(ILBM_Image *image, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
-void SDL_ILBM_initScreenFromImage(ILBM_Image *image, amiVideo_Screen *screen);
+int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
-int SDL_ILBM_setPalette(SDL_Surface *surface, const amiVideo_Palette *palette);
+SDL_ILBM_Image *SDL_ILBM_createImage(ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
-int SDL_ILBM_convertScreenPixelsToSurfacePixels(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor);
+int SDL_ILBM_blitImageToSurface(SDL_ILBM_Image *image, const SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect);
 
-SDL_Surface *SDL_ILBM_generateSurfaceFromScreen(const ILBM_Image *image, amiVideo_Screen *screen, const SDL_ILBM_Format format, const unsigned int lowresPixelScaleFactor);
+void SDL_ILBM_destroyImage(SDL_ILBM_Image *image);
+
+void SDL_ILBM_freeImage(SDL_ILBM_Image *image);
+
+void SDL_ILBM_cycleColors(SDL_ILBM_Image *image);
+
+void SDL_ILBM_resetColors(SDL_ILBM_Image *image);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

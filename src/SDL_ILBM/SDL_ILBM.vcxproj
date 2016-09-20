@@ -86,14 +86,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="amivideo2surface.c" />
     <ClCompile Include="cycle.c" />
+    <ClCompile Include="display.c" />
+    <ClCompile Include="image2amivideo.c" />
     <ClCompile Include="image.c" />
-    <ClCompile Include="window.c" />
+    <ClCompile Include="render.c" />
+    <ClCompile Include="set.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="amivideo2surface.h" />
     <ClInclude Include="cycle.h" />
+    <ClInclude Include="display.h" />
+    <ClInclude Include="image2amivideo.h" />
     <ClInclude Include="image.h" />
-    <ClInclude Include="window.h" />
+    <ClInclude Include="render.h" />
+    <ClInclude Include="set.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SDL_ILBM.def" />
