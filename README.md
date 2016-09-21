@@ -377,7 +377,7 @@ formats:
 * `SDL_ILBM_AUTO_FORMAT` chooses the most memory efficient option -- it will
   choose `SDL_ILBM_CHUNKY_FORMAT` unless the bitplane surface requires more than
   256 colors. If the latter is the case, then it will choose
-  `SDL_ILBM_AUTO_FORMAT`.
+  `SDL_ILBM_RGB_FORMAT`.
 
 ILBM viewer command-line utility
 ================================

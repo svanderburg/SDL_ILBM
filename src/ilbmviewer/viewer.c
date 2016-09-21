@@ -203,7 +203,7 @@ int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, 
     
     if(number > set->imagesLength)
     {
-        fprintf(stderr, "Image with index: %d does not exist. Valid ranges are: 0 - %d\n", number, set->imagesLength);
+        fprintf(stderr, "Image with index: %d does not exist. Valid ranges are: 0 - %d\n", number, set->imagesLength - 1);
         SDL_ILBM_freeSet(set);
         return 1;
     }

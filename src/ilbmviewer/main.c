@@ -41,7 +41,7 @@ static void printUsage(const char *command)
     printf("Options:\n");
 #ifdef _MSC_VER
     printf("  /f FORMAT  Specify the output format. Possible values are: auto, chunky or rgb.\n");
-    printf("              Defaults to: auto\n");
+    printf("             Defaults to: auto\n");
     printf("  /C         Turn cycle mode on by default\n");
     printf("  /s         Do not clip the picture inside the page but stretch it to its full\n");
     printf("             size\n");
