@@ -89,7 +89,7 @@ int SDL_ILBM_initImageFromSet(const SDL_ILBM_Set *set, const unsigned int index,
         return FALSE;
 }
 
-SDL_ILBM_Image *SDL_ILBM_createImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, unsigned int lowresPixelScaleFactor, SDL_ILBM_Format format)
+SDL_ILBM_Image *SDL_ILBM_createImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format)
 {
     if(index < set->imagesLength)
         return SDL_ILBM_createImage(set->ilbmImages[index], lowresPixelScaleFactor, format);

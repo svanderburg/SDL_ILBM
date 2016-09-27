@@ -36,34 +36,122 @@ typedef struct SDL_ILBM_Set SDL_ILBM_Set;
 #include <libilbm/ilbmimage.h>
 #include "image.h"
 
+/**
+ * @brief An encapsulation of a set of images that originate from an IFF/ILBM file.
+ */
 struct SDL_ILBM_Set
 {
+    /** Reference to a parsed chunk originating from an IFF file */
     IFF_Chunk *chunk;
+    
+    /** An array extracted ILBM images from an IFF file */
     ILBM_Image **ilbmImages;
+    
+    /** Specifies the length of the ILBM images array */
     unsigned int imagesLength;
+    
+    /* Indicates whether the chunk must be deallocated while freeing the set */
     int mustFreeChunk;
 };
 
+/**
+ * Initializes a preallocated set by opening a file with a specified filename.
+ *
+ * @param set A preallocated set
+ * @param filename Path to an IFF file to open
+ * @return TRUE if the initialization succeeded, else FALSE
+ */
 int SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
 
+/**
+ * Initializes a preallocated set by opening a file with a specific file
+ * descriptor.
+ *
+ * @param set A preallocated set
+ * @param file File descriptor
+ * @return TRUE if the initialization succeeded, else FALSE
+ */
 int SDL_ILBM_initSetFromFd(SDL_ILBM_Set *set, FILE *file);
 
+/**
+ * Initializes a preallocated set by parsing an IFF chunk.
+ *
+ * @param set A preallocated set
+ * @param chunk IFF chunk originating from a parsed file
+ * @param mustFreeChunk Indicates whether the provided chunk must be freed from memory while freeing the set
+ */
 int SDL_ILBM_initSetFromIFFChunk(SDL_ILBM_Set *set, IFF_Chunk *chunk, int mustFreeChunk);
 
+/**
+ * Creates a set by opening a file with a specified filename.
+ *
+ * @param filename Path to an IFF file to open
+ * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
+ */
 SDL_ILBM_Set *SDL_ILBM_createSetFromFilename(const char *filename);
 
+/**
+ * Creates a set by opening a file with a specific file descriptor.
+ *
+ * @param file File descriptor
+ * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
+ */
 SDL_ILBM_Set *SDL_ILBM_createSetFromFd(FILE *file);
 
+/**
+ * Creates a set by parsing an IFF chunk.
+ *
+ * @param chunk IFF chunk originating from a parsed file
+ * @param mustFreeChunk Indicates whether the provided chunk must be freed from memory while freeing the set
+ * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
+ */
 SDL_ILBM_Set *SDL_ILBM_createSetFromIFFChunk(IFF_Chunk *chunk, int mustFreeChunk);
 
+/**
+ * Creates an SDL_Surface from an image in the set.
+ *
+ * @param set An SDL_ILBM_Set containing images
+ * @param index Index of the image in the set
+ * @param lowresPixelScaleFactor Specifies the width of a lowres pixel
+ * @param format Defines to which format the output must be converted
+ * @return An SDL_Surface or NULL in case of an error. The result surface must be freed with SDL_FreeSurface()
+ */
 SDL_Surface *SDL_ILBM_createSurfaceFromSet(const SDL_ILBM_Set *set, const unsigned int index, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
+/**
+ * Initializes a preallocated cyclable SDL_ILBM_Image from an image in the set.
+ *
+ * @param set An SDL_ILBM_Set containing images
+ * @param index Index of the image in the set
+ * @param lowresPixelScaleFactor Specifies the width of a lowres pixel
+ * @param format Defines to which format the output must be converted
+ * @return TRUE if the initialization succeeded, else FALSE
+ */
 int SDL_ILBM_initImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, SDL_ILBM_Image *image, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
-SDL_ILBM_Image *SDL_ILBM_createImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, unsigned int lowresPixelScaleFactor, SDL_ILBM_Format format);
+/**
+ * Creates a cyclable SDL_ILBM_Image from an image in the set.
+ *
+ * @param set An SDL_ILBM_Set containing images
+ * @param index Index of the image in the set
+ * @param lowresPixelScaleFactor Specifies the width of a lowres pixel
+ * @param format Defines to which format the output must be converted
+ * @return An SDL_ILBM_Image or NULL in case of an error. The resulting image must be freed with SDL_ILBM_freeImage()
+ */
+SDL_ILBM_Image *SDL_ILBM_createImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
+/**
+ * Clears all properties of a set from memory.
+ *
+ * @param set An SDL_ILBM_Set containing images
+ */
 void SDL_ILBM_cleanupSet(SDL_ILBM_Set *set);
 
+/**
+ * Frees a set from memory.
+ *
+ * @param set An SDL_ILBM_Set containing images
+ */
 void SDL_ILBM_freeSet(SDL_ILBM_Set *set);
 
 #ifdef __cplusplus
