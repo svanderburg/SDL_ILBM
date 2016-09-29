@@ -28,7 +28,6 @@
 #include "image2amivideo.h"
 #include "amivideo2surface.h"
 #include "render.h"
-#include "cycle.h"
 
 /* Choose appropriate lowres pixel scale factor */
 

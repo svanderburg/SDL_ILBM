@@ -85,10 +85,10 @@ struct SDL_ILBM_Image
 SDL_Surface *SDL_ILBM_createSurface(ILBM_Image *image, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
 /**
- * Initializes a preallocated SDL image from a given ILBM image in a specified
+ * Initializes a preallocated SDL_ILBM_Image from a given ILBM image in a specified
  * output format.
  *
- * @param image Preallocated SDL image instance
+ * @param image Preallocated SDL_ILBM_Image instance
  * @param ilbmImage ILBM image to generate the output from
  * @param lowresPixelScaleFactor Specifies the width of a lowres pixel
  * @param format Defines to which format the output must be converted
@@ -97,7 +97,7 @@ SDL_Surface *SDL_ILBM_createSurface(ILBM_Image *image, const unsigned int lowres
 int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
 /**
- * Composes an SDL image from a given ILBM image in a specified output format.
+ * Composes an SDL_ILBM_Image from a given ILBM image in a specified output format.
  *
  * @param ilbmImage ILBM image to generate the output from
  * @param lowresPixelScaleFactor Specifies the width of a lowres pixel
@@ -107,7 +107,7 @@ int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsig
 SDL_ILBM_Image *SDL_ILBM_createImage(ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
 /**
- * Blits an SDL image to a provided SDL Surface, optionally restricting the
+ * Blits an SDL_ILBM_Image to a provided SDL Surface, optionally restricting the
  * source and destination areas to a specific subsets. This function is
  * basically a wrapper around SDL's SDL_BlitSurface() function.
  *

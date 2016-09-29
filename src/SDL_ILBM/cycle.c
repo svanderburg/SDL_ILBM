@@ -25,6 +25,10 @@
 #include "cycle.h"
 #include <stdlib.h>
 
+#define _60_STEPS 60.0
+#define MILLIS_PER_SECOND 1000
+#define MICROS_PER_MILLIS 1000
+
 static void shiftColorRange(amiVideo_Palette *palette, const ILBM_ColorRange *colorRange)
 {
     unsigned int i;
@@ -79,17 +83,17 @@ static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycl
 
 static Uint32 computeColorRangeTime(const Uint32 ticks, const ILBM_ColorRange *colorRange)
 {
-    return (Uint32)(1000 / (60.0 * colorRange->rate / ILBM_COLORRANGE_60_STEPS_PER_SECOND) + ticks);
+    return (Uint32)(MILLIS_PER_SECOND / (_60_STEPS * colorRange->rate / ILBM_COLORRANGE_60_STEPS_PER_SECOND) + ticks);
 }
 
 static Uint32 computeDRangeTime(const Uint32 ticks, const ILBM_DRange *drange)
 {
-    return (Uint32)(1000 / (60.0 * drange->rate / ILBM_DRANGE_60_STEPS_PER_SECOND) + ticks);
+    return (Uint32)(MILLIS_PER_SECOND / (_60_STEPS * drange->rate / ILBM_DRANGE_60_STEPS_PER_SECOND) + ticks);
 }
 
 static Uint32 computeCycleInfoTime(const Uint32 ticks, const ILBM_CycleInfo *cycleInfo)
 {
-    return (Uint32)(1000 * cycleInfo->seconds + cycleInfo->microSeconds / 1000 + ticks);
+    return (Uint32)(MILLIS_PER_SECOND * cycleInfo->seconds + cycleInfo->microSeconds / MICROS_PER_MILLIS + ticks);
 }
 
 void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *image)
