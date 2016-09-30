@@ -159,6 +159,7 @@ int SDL_ILBM_blitImageToSurface(SDL_ILBM_Image *image, const SDL_Rect *srcrect, 
 void SDL_ILBM_destroyImage(SDL_ILBM_Image *image)
 {
     SDL_FreeSurface(image->surface);
+    amiVideo_cleanupScreen(&image->screen);
     SDL_ILBM_cleanupRangeTimes(&image->rangeTimes);
 }
 

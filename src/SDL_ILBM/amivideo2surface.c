@@ -33,24 +33,30 @@ SDL_Surface *SDL_ILBM_createUncorrectedChunkySurfaceFromScreen(amiVideo_Screen *
 {
     SDL_Surface *surface = SDL_CreateRGBSurface(0, screen->width, screen->height, 8, 0, 0, 0, 0);
     
-    /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
-    amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, surface->pixels, surface->pitch);
+    if(surface != NULL)
+    {
+        /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
+        amiVideo_setScreenUncorrectedChunkyPixelsPointer(screen, surface->pixels, surface->pitch);
+        
+        /* Convert the colors of the the bitplane palette to the format of the chunky palette */
+        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
     
-    /* Convert the colors of the the bitplane palette to the format of the chunky palette */
-    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-    
-    /* Set the palette of the target SDL surface */
-    SDL_ILBM_setSurfacePaletteFromScreenPalette(&screen->palette, surface);
+        /* Set the palette of the target SDL surface */
+        SDL_ILBM_setSurfacePaletteFromScreenPalette(&screen->palette, surface);
+    }
     
     return surface;
 }
 
 SDL_Surface *SDL_ILBM_createUncorrectedRGBSurfaceFromScreen(amiVideo_Screen *screen, const ILBM_Image *image)
 {
-    int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
     SDL_Surface *surface = SDL_CreateRGBSurface(0, screen->width, screen->height, 32, 0, 0, 0, 0);
     
-    amiVideo_setScreenUncorrectedRGBPixelsPointer(screen, surface->pixels, surface->pitch, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
+    if(surface != NULL)
+    {
+        int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
+        amiVideo_setScreenUncorrectedRGBPixelsPointer(screen, surface->pixels, surface->pitch, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
+    }
     
     return surface;
 }
@@ -58,20 +64,24 @@ SDL_Surface *SDL_ILBM_createUncorrectedRGBSurfaceFromScreen(amiVideo_Screen *scr
 SDL_Surface *SDL_ILBM_createCorrectedChunkySurfaceFromScreen(amiVideo_Screen *screen, const ILBM_Image *image, const unsigned int lowresPixelScaleFactor)
 {
     SDL_Surface *surface;
-    int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
     
     amiVideo_setLowresPixelScaleFactor(screen, lowresPixelScaleFactor);
     
     surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 8, 0, 0, 0, 0);
     
-    /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
-    amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 1, allocateUncorrectedMemory, 0, 0, 0, 0);
-    
-    /* Convert the colors of the the bitplane palette to the format of the chunky palette */
-    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-    
-    /* Set the palette of the target SDL surface */
-    SDL_ILBM_setSurfacePaletteFromScreenPalette(&screen->palette, surface);
+    if(surface != NULL)
+    {
+        int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
+        
+        /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
+        amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 1, allocateUncorrectedMemory, 0, 0, 0, 0);
+        
+        /* Convert the colors of the the bitplane palette to the format of the chunky palette */
+        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+        
+        /* Set the palette of the target SDL surface */
+        SDL_ILBM_setSurfacePaletteFromScreenPalette(&screen->palette, surface);
+    }
     
     return surface;
 }
@@ -79,12 +89,16 @@ SDL_Surface *SDL_ILBM_createCorrectedChunkySurfaceFromScreen(amiVideo_Screen *sc
 SDL_Surface *SDL_ILBM_createCorrectedRGBSurfaceFromScreen(amiVideo_Screen *screen, const ILBM_Image *image, const unsigned int lowresPixelScaleFactor)
 {
     SDL_Surface *surface;
-    int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
     
     amiVideo_setLowresPixelScaleFactor(screen, lowresPixelScaleFactor);
     
     surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 32, 0, 0, 0, 0);
-    amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 4, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
+    
+    if(surface != NULL)
+    {
+        int allocateUncorrectedMemory = !ILBM_imageIsPBM(image);
+        amiVideo_setScreenCorrectedPixelsPointer(screen, surface->pixels, surface->pitch, 4, allocateUncorrectedMemory, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift); /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
+    }
     
     return surface;
 }
