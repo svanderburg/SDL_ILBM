@@ -95,7 +95,7 @@
     <ClCompile Include="set.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="amivideo2surface.h" />
+    <ClInclude Include="amivideo2surface.h" />
     <ClInclude Include="cycle.h" />
     <ClInclude Include="display.h" />
     <ClInclude Include="image2amivideo.h" />
