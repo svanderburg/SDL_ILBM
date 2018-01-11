@@ -29,16 +29,29 @@
 #define MILLIS_PER_SECOND 1000
 #define MICROS_PER_MILLIS 1000
 
-static void shiftColorRange(amiVideo_Palette *palette, const ILBM_ColorRange *colorRange)
+static void shiftColorRange(amiVideo_Palette *palette, const ILBM_ColorRange *colorRange, int shiftRight)
 {
     unsigned int i;
     amiVideo_Color *color = palette->bitplaneFormat.color;
-    amiVideo_Color temp = color[colorRange->low];
 
-    for(i = colorRange->low; i < colorRange->high; i++)
-	color[i] = color[i + 1];
+    if(shiftRight)
+    {
+        amiVideo_Color temp = color[colorRange->low];
 
-    color[colorRange->high] = temp;
+        for(i = colorRange->low; i < colorRange->high; i++)
+            color[i] = color[i + 1];
+
+        color[colorRange->high] = temp;
+    }
+    else
+    {
+        amiVideo_Color temp = color[colorRange->high];
+
+        for(i = colorRange->high; i > colorRange->low; i--)
+            color[i] = color[i - 1];
+
+        color[colorRange->low] = temp;
+    }
 }
 
 static void shiftDRange(amiVideo_Palette *palette, const ILBM_DRange *drange)
@@ -57,7 +70,7 @@ static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycl
 {
     amiVideo_Color *color = palette->bitplaneFormat.color;
     
-    if(cycleInfo->direction == -1)
+    if(cycleInfo->direction == ILBM_CYCLEINFO_SHIFT_LEFT)
     {
 	/* Shift left */
 	unsigned int i;
@@ -68,7 +81,7 @@ static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycl
 	
 	color[cycleInfo->start] = temp;
     }
-    else if(cycleInfo->direction == 1)
+    else if(cycleInfo->direction == ILBM_CYCLEINFO_SHIFT_RIGHT)
     {
 	/* Shift right */
 	unsigned int i;
@@ -138,7 +151,7 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
 	
 	if(colorRange->active != 0 && ticks >= crngTimes[i])
 	{
-	    shiftColorRange(palette, colorRange);
+	    shiftColorRange(palette, colorRange, colorRange->active & ILBM_COLORRANGE_SHIFT_RIGHT);
 	    crngTimes[i] = computeColorRangeTime(ticks, colorRange); /* Update time */
 	}
     }
