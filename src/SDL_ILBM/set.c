@@ -29,9 +29,15 @@
 int SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename)
 {
     FILE *file = fopen(filename, "rb");
-    int status = SDL_ILBM_initSetFromFd(set, file);
-    fclose(file);
-    return status;
+
+    if(file == NULL)
+        return FALSE;
+    else
+    {
+        int status = SDL_ILBM_initSetFromFd(set, file);
+        fclose(file);
+        return status;
+    }
 }
 
 int SDL_ILBM_initSetFromFd(SDL_ILBM_Set *set, FILE *file)
