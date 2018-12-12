@@ -35,43 +35,56 @@ static void printUsage(const char *command)
 {
     printf("Usage: %s [OPTION] [file.ILBM]\n\n", command);
 
-    printf("View a collection of ILBM images inside an IFF file. If no ILBM file is given it reads\n");
-    printf("from the standard input.\n\n");
-    
-    printf("Options:\n");
+    puts(
+    "View a collection of ILBM images inside an IFF file. If no ILBM file is given it reads\n"
+    "from the standard input.\n"
+    );
+
+    puts(
+    "Options:\n"
 #ifdef _MSC_VER
-    printf("  /f FORMAT  Specify the output format. Possible values are: auto, chunky or rgb.\n");
-    printf("             Defaults to: auto\n");
-    printf("  /C         Turn cycle mode on by default\n");
-    printf("  /s         Do not clip the picture inside the page but stretch it to its full\n");
-    printf("             size\n");
-    printf("  /c VALUE   Specifies the scale factor of a lowres pixel to properly correct\n");
-    printf("             its aspect ratio. Possible values are: auto, none, 2, 4\n");
-    printf("  /F         Views the picture in full screen\n");
-    printf("  /n NUM     Displays the n-th picture inside the IFF scrap file. Defaults to: 0\n");
-    printf("  /?         Shows the usage of the command to the user\n");
-    printf("  /v         Shows the version of the command to the user\n");
+    "  /f FORMAT  Specify the output format. Possible values are: auto, chunky or rgb.\n"
+    "             Defaults to: auto\n"
+    "  /C         Turn cycle mode on by default\n"
+    "  /s         Do not clip the picture inside the page but stretch it to its full\n"
+    "             size"
+    );
+    puts(
+    "  /c VALUE   Specifies the scale factor of a lowres pixel to properly correct\n"
+    "             its aspect ratio. Possible values are: auto, none, 2, 4\n"
+    "  /F         Views the picture in full screen\n"
+    );
+    "  /n NUM     Displays the n-th picture inside the IFF scrap file. Defaults to: 0\n"
+    "  /?         Shows the usage of the command to the user\n"
+    "  /v         Shows the version of the command to the user\n"
 #else
-    printf("  -f, --format=FORMAT         Specify the output format. Possible values are:\n");
-    printf("                              auto, chunky or rgb. Defaults to: auto\n");
-    printf("  -C, --cycle                 Turn cycle mode on by default\n");
-    printf("  -s, --stretch               Do not clip the picture inside the page but\n");
-    printf("                              stretch it to its full size\n");\
-    printf("  -c, --correct-aspect=VALUE  Specifies the scale factor of a lowres pixel to\n");
-    printf("                              properly correct its aspect ratio. Possible values\n");
-    printf("                              are: auto, none, 2, 4\n");
-    printf("  -F, --fullscreen            Views the picture in full screen\n");
-    printf("  -n, --number=NUM            Displays the n-th picture inside the IFF scrap\n");
-    printf("                              file. Defaults to: 0\n");
-    printf("  -h, --help                  Shows the usage of the command to the user\n");
-    printf("  -v, --version               Shows the version of the command to the user\n");
+    "  -f, --format=FORMAT         Specify the output format. Possible values are:\n"
+    "                              auto, chunky or rgb. Defaults to: auto\n"
+    "  -C, --cycle                 Turn cycle mode on by default\n"
+    "  -s, --stretch               Do not clip the picture inside the page but\n"
+    "                              stretch it to its full size"
+    );
+    puts(
+    "  -c, --correct-aspect=VALUE  Specifies the scale factor of a lowres pixel to\n"
+    "                              properly correct its aspect ratio. Possible values\n"
+    "                              are: auto, none, 2, 4\n"
+    "  -F, --fullscreen            Views the picture in full screen"
+    );
+    puts(
+    "  -n, --number=NUM            Displays the n-th picture inside the IFF scrap\n"
+    "                              file. Defaults to: 0\n"
+    "  -h, --help                  Shows the usage of the command to the user\n"
+    "  -v, --version               Shows the version of the command to the user"
 #endif
+    );
 }
 
 static void printVersion(const char *command)
 {
-    printf("%s (" PACKAGE_NAME ") " PACKAGE_VERSION "\n\n", command);
-    printf("Copyright (C) 2012-2015 Sander van der Burg\n");
+    printf(
+    "%s (" PACKAGE_NAME ") " PACKAGE_VERSION "\n\n"
+    "Copyright (C) 2012-2015 Sander van der Burg\n"
+    , command);
 }
 
 static SDL_ILBM_Format determineFormat(const char *format)
