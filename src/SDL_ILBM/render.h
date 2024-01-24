@@ -33,13 +33,13 @@ extern "C" {
 #include <libilbm/ilbmimage.h>
 #include <libamivideo/screen.h>
 
-int SDL_ILBM_renderUncorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
+amiVideo_Bool SDL_ILBM_renderUncorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
 
-int SDL_ILBM_renderUncorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
+amiVideo_Bool SDL_ILBM_renderUncorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
 
-int SDL_ILBM_renderCorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
+amiVideo_Bool SDL_ILBM_renderCorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
 
-int SDL_ILBM_renderCorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
+amiVideo_Bool SDL_ILBM_renderCorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
 
 #ifdef __cplusplus
 }

@@ -54,14 +54,14 @@ static SDL_Surface *createSurfaceFromScreen(amiVideo_Screen *screen, ILBM_Image 
     unsigned int realLowresPixelScaleFactor;
     SDL_ILBM_Format realFormat;
     SDL_Surface *surface;
-    
+
     /* Attach the image to screen conversion pipeline */
     SDL_ILBM_attachImageToScreen(image, screen);
-    
+
     /* Calculate real values */
     realLowresPixelScaleFactor = selectLowresPixelScaleFactor(lowresPixelScaleFactor, screen->viewportMode);
     realFormat = selectColorFormat(format, screen);
-    
+
     /* Create and render the surface */
     if(realLowresPixelScaleFactor > 1)
     {
@@ -89,7 +89,7 @@ static SDL_Surface *createSurfaceFromScreen(amiVideo_Screen *screen, ILBM_Image 
             SDL_ILBM_renderUncorrectedRGBImage(image, screen, surface);
         }
     }
-    
+
     return surface;
 }
 
@@ -105,21 +105,21 @@ static int updateChunkyPalette(const ILBM_Image *image, amiVideo_Screen *screen,
     return SDL_ILBM_setSurfacePaletteFromScreenPalette(&screen->palette, surface);
 }
 
-int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format)
+amiVideo_Bool SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format)
 {
     /* Attach some properties to the facade */
     image->image = ilbmImage;
-    
+
     /* Initialise the range times */
     SDL_ILBM_initRangeTimes(&image->rangeTimes, image->image);
-    
+
     /* Create and initially render the surface */
     image->surface = createSurfaceFromScreen(&image->screen, image->image, lowresPixelScaleFactor, format);
-    
+
     /* Memorize real values. TODO: duplicate, maybe somewhere else? */
     image->format = selectColorFormat(format, &image->screen);
     image->lowresPixelScaleFactor = selectLowresPixelScaleFactor(lowresPixelScaleFactor, image->screen.viewportMode);
-    
+
     /* Pick palette update function */
     if(image->format == SDL_ILBM_CHUNKY_FORMAT)
         image->updatePaletteAndSurface = updateChunkyPalette; /* For chunky/8-bit surfaces, we simply need to modify its palette and then reblit it */
@@ -131,14 +131,14 @@ int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsig
         else
             image->updatePaletteAndSurface = SDL_ILBM_renderUncorrectedRGBImage;
     }
-    
+
     return (image->surface != NULL);
 }
 
 SDL_ILBM_Image *SDL_ILBM_createImage(ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format)
 {
     SDL_ILBM_Image *image = (SDL_ILBM_Image*)malloc(sizeof(SDL_ILBM_Image));
-    
+
     if(image != NULL)
     {
         if(!SDL_ILBM_initImage(image, ilbmImage, lowresPixelScaleFactor, format))
@@ -147,7 +147,7 @@ SDL_ILBM_Image *SDL_ILBM_createImage(ILBM_Image *ilbmImage, const unsigned int l
             return NULL;
         }
     }
-    
+
     return image;
 }
 

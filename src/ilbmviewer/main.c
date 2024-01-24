@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     unsigned int number = 0;
     unsigned int options = 0;
     char *filename;
-    
+
 #ifdef _MSC_VER
     unsigned int optind = 1;
     unsigned int i; 
@@ -240,11 +240,11 @@ int main(int argc, char *argv[])
 #endif
 
     /* Validate non options */
-    
+
     if (optind >= argc)
         filename = NULL;
     else
         filename = argv[optind];
-        
+
     return SDL_ILBM_viewILBMImages(filename, format, number, lowresPixelScaleFactor, options);
 }

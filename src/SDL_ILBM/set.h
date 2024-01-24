@@ -43,15 +43,15 @@ struct SDL_ILBM_Set
 {
     /** Reference to a parsed chunk originating from an IFF file */
     IFF_Chunk *chunk;
-    
+
     /** An array extracted ILBM images from an IFF file */
     ILBM_Image **ilbmImages;
-    
+
     /** Specifies the length of the ILBM images array */
     unsigned int imagesLength;
-    
+
     /* Indicates whether the chunk must be deallocated while freeing the set */
-    int mustFreeChunk;
+    IFF_Bool mustFreeChunk;
 };
 
 /**
@@ -61,7 +61,7 @@ struct SDL_ILBM_Set
  * @param filename Path to an IFF file to open
  * @return TRUE if the initialization succeeded, else FALSE
  */
-int SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
+IFF_Bool SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
 
 /**
  * Initializes a preallocated set by opening a file with a specific file
@@ -71,7 +71,7 @@ int SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
  * @param file File descriptor
  * @return TRUE if the initialization succeeded, else FALSE
  */
-int SDL_ILBM_initSetFromFd(SDL_ILBM_Set *set, FILE *file);
+IFF_Bool SDL_ILBM_initSetFromFd(SDL_ILBM_Set *set, FILE *file);
 
 /**
  * Initializes a preallocated set by parsing an IFF chunk.
@@ -127,7 +127,7 @@ SDL_Surface *SDL_ILBM_createSurfaceFromSet(const SDL_ILBM_Set *set, const unsign
  * @param format Defines to which format the output must be converted
  * @return TRUE if the initialization succeeded, else FALSE
  */
-int SDL_ILBM_initImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, SDL_ILBM_Image *image, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
+IFF_Bool SDL_ILBM_initImageFromSet(const SDL_ILBM_Set *set, const unsigned int index, SDL_ILBM_Image *image, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
 /**
  * Creates a cyclable SDL_ILBM_Image from an image in the set.

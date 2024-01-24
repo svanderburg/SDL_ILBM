@@ -29,7 +29,7 @@
 int SDL_ILBM_initDisplay(SDL_ILBM_Display *display, const SDL_ILBM_Image *image, const int stretch)
 {
     display->image = image;
-    
+
     /* Determine the appropriate dimensions of the display */
     if(stretch)
     {
@@ -49,21 +49,21 @@ int SDL_ILBM_initDisplay(SDL_ILBM_Display *display, const SDL_ILBM_Image *image,
             display->height = amiVideo_calculateCorrectedHeight(image->lowresPixelScaleFactor, image->image->bitMapHeader->pageHeight, image->screen.viewportMode);
         }
     }
-    
+
     /* Allocate a conversion surface, if needed */
-    
+
     if(image->format == SDL_ILBM_CHUNKY_FORMAT)
     {
         display->mustFreeBlitSurface = TRUE;
         display->blitSurface = SDL_CreateRGBSurface(0, image->surface->w, image->surface->h, 32, 0, 0, 0, 0);
-        
+
         return (display->blitSurface != NULL);
     }
     else
     {
         display->mustFreeBlitSurface = FALSE;
         display->blitSurface = image->surface;
-        
+
         return TRUE;
     }
 }
@@ -71,7 +71,7 @@ int SDL_ILBM_initDisplay(SDL_ILBM_Display *display, const SDL_ILBM_Image *image,
 SDL_ILBM_Display *SDL_ILBM_createDisplay(const SDL_ILBM_Image *image, const int stretch)
 {
     SDL_ILBM_Display *display = (SDL_ILBM_Display*)malloc(sizeof(SDL_ILBM_Image));
-    
+
     if(display != NULL)
     {
         if(!SDL_ILBM_initDisplay(display, image, stretch))
@@ -80,7 +80,7 @@ SDL_ILBM_Display *SDL_ILBM_createDisplay(const SDL_ILBM_Image *image, const int 
             return NULL;
         }
     }
-    
+
     return display;
 }
 
@@ -114,16 +114,16 @@ SDL_Texture *SDL_ILBM_createTexture(SDL_Renderer *renderer, Uint32 format, int a
     return SDL_CreateTexture(renderer, format, access, display->blitSurface->w, display->blitSurface->h);
 }
 
-int SDL_ILBM_blitDisplayToTexture(SDL_ILBM_Display *display, Uint32 format, void *pixels, int pitch)
+amiVideo_Bool SDL_ILBM_blitDisplayToTexture(SDL_ILBM_Display *display, Uint32 format, void *pixels, int pitch)
 {
     if(display->mustFreeBlitSurface)
     {
         if(SDL_BlitSurface(display->image->surface, NULL, display->blitSurface, NULL) < 0) /* Convert the picture surface's format to the window surface format by blitting it */
             return FALSE;
     }
-    
+
     /* Transfer and convert the pixels to the texture */
-    
+
     if(SDL_ConvertPixels(display->blitSurface->w, display->blitSurface->h, display->blitSurface->format->format, display->blitSurface->pixels, display->blitSurface->pitch, format, pixels, pitch) < 0)
         return FALSE;
     else
@@ -137,6 +137,6 @@ int SDL_ILBM_renderCopy(SDL_Renderer *renderer, SDL_Texture *texture, int x, int
     srcrect.y = y;
     srcrect.w = display->width;
     srcrect.h = display->height;
-    
+
     return SDL_RenderCopy(renderer, texture, &srcrect, NULL);
 }

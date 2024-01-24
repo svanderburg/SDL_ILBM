@@ -40,16 +40,16 @@ struct SDL_ILBM_Display
 {
     /** Reference to the SDL_ILBM_Image that is supposed to be displayed */
     const SDL_ILBM_Image *image;
-    
+
     /** The width of the display (corresponds to the page width or the image width) */
     int width;
-    
+
     /** The height of the display (corresponds to the page height or the image height) */
     int height;
-    
+
     /** A surface used for converting the image to a 32-bit surface format so that it can blitted to a texture */
     SDL_Surface *blitSurface;
-    
+
     /** Indicates whether the blit surface must be freed while freeing the SDL_ILBM_Display struct */
     int mustFreeBlitSurface;
 };
@@ -130,7 +130,7 @@ SDL_Texture *SDL_ILBM_createTexture(SDL_Renderer *renderer, Uint32 format, int a
  * @param pitch The size of each scanline in bytes
  * @return TRUE in case success, else FALSE
  */
-int SDL_ILBM_blitDisplayToTexture(SDL_ILBM_Display *display, Uint32 format, void *pixels, int pitch);
+amiVideo_Bool SDL_ILBM_blitDisplayToTexture(SDL_ILBM_Display *display, Uint32 format, void *pixels, int pitch);
 
 /**
  * Renders the texture to a window while taking the window's dimensions and the

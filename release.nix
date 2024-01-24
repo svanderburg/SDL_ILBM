@@ -10,9 +10,9 @@
 
 let
   pkgs = import nixpkgs {};
-  
+
   version = builtins.readFile ./version;
-  
+
   SDL2devel = pkgs.stdenv.mkDerivation {
     name = "SDL2-devel-2.0.3";
     src = pkgs.fetchurl {
@@ -26,7 +26,7 @@ let
     '';
     dontStrip = true;
   };
-  
+
   jobs = rec {
     tarball =
       with pkgs;
@@ -42,14 +42,14 @@ let
         inherit version officialRelease;
         dontBuild = false;
 
-        buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 help2man ];
+        buildInputs = [ pkg-config libiff libilbm libamivideo SDL2 help2man ];
         CFLAGS = "-ansi -pedantic -Wall";
       };
-      
+
     build =
       (pkgs.lib.genAttrs systems (system:
         with import nixpkgs { inherit system; };
-        
+
         let
           libiff = builtins.getAttr system (libiffJobset.build);
           libilbm = builtins.getAttr system (libilbmJobset.build);
@@ -59,7 +59,7 @@ let
           name = "SDL_ILBM";
           inherit version;
           src = tarball;
-          buildInputs = [ pkgconfig libiff libilbm libamivideo SDL2 ];
+          buildInputs = [ pkg-config libiff libilbm libamivideo SDL2 ];
           CFLAGS = "-ansi -pedantic -Wall";
         }
       )) //
@@ -89,7 +89,7 @@ let
       });
   };
 in
-jobs // (pkgs.stdenv.lib.optionalAttrs (buildForWindows) {
+jobs // (pkgs.lib.optionalAttrs (buildForWindows) {
   windist = 
     let
       libiff = libiffJobset.build.i686-windows;

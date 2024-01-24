@@ -54,22 +54,22 @@ struct SDL_ILBM_Image
 {
     /** Reference to the ILBM image from which this image is generated */
     ILBM_Image *image;
-    
+
     /** Reference to the screen converting the image to the desired output format */
     amiVideo_Screen screen;
-    
+
     /** Reference to the SDL Surface that can be blitted */
     SDL_Surface *surface;
-    
+
     /** Maintains the ellapsed cycle range times */
     SDL_ILBM_RangeTimes rangeTimes;
-    
+
     /** Specifies the width of a lowres pixel */
     int lowresPixelScaleFactor;
-    
+
     /** Defines to which format the output must be converted */
     SDL_ILBM_Format format;
-    
+
     /** Function that must be executed to update the palette and surface each time a color cycles. This function is for internal use only. */
     int (*updatePaletteAndSurface) (const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface);
 };
@@ -94,7 +94,7 @@ SDL_Surface *SDL_ILBM_createSurface(ILBM_Image *image, const unsigned int lowres
  * @param format Defines to which format the output must be converted
  * @return TRUE if the initalisation succeeded, otherwise FALSE
  */
-int SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
+amiVideo_Bool SDL_ILBM_initImage(SDL_ILBM_Image *image, ILBM_Image *ilbmImage, const unsigned int lowresPixelScaleFactor, const SDL_ILBM_Format format);
 
 /**
  * Composes an SDL_ILBM_Image from a given ILBM image in a specified output format.

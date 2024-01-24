@@ -25,14 +25,14 @@
 #include "render.h"
 #include <string.h>
 
-int SDL_ILBM_renderUncorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
+amiVideo_Bool SDL_ILBM_renderUncorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
 {
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return FALSE;
     }
-    
+
     if(ILBM_imageIsPBM(image))
     {
         if(image->body != NULL)
@@ -43,21 +43,21 @@ int SDL_ILBM_renderUncorrectedChunkyImage(const ILBM_Image *image, amiVideo_Scre
         if(image->bitplanes != NULL)
             amiVideo_convertScreenBitplanesToChunkyPixels(screen); /* Convert the bitplanes to chunky pixels */
     }
-    
+
     if(SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-    
+
     return TRUE;
 }
 
-int SDL_ILBM_renderUncorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
+amiVideo_Bool SDL_ILBM_renderUncorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
 {
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return FALSE;
     }
-    
+
     if(ILBM_imageIsPBM(image))
     {
         if(image->body != NULL)
@@ -77,21 +77,21 @@ int SDL_ILBM_renderUncorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen 
         if(image->bitplanes != NULL)
             amiVideo_convertScreenBitplanesToRGBPixels(screen); /* Convert the bitplanes to RGB pixels */
     }
-    
+
     if(SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-    
+
     return TRUE;
 }
 
-int SDL_ILBM_renderCorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
+amiVideo_Bool SDL_ILBM_renderCorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
 {
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return FALSE;
     }
-    
+
     if(ILBM_imageIsPBM(image))
     {
         if(image->body != NULL)
@@ -102,21 +102,21 @@ int SDL_ILBM_renderCorrectedChunkyImage(const ILBM_Image *image, amiVideo_Screen
         if(image->bitplanes != NULL)
             amiVideo_convertScreenBitplanesToCorrectedChunkyPixels(screen); /* Convert the bitplanes to corrected chunky pixels */
     }
-    
+
     if(SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-    
+
     return TRUE;
 }
 
-int SDL_ILBM_renderCorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
+amiVideo_Bool SDL_ILBM_renderCorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *screen, SDL_Surface *surface)
 {
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return FALSE;
     }
-    
+
     if(ILBM_imageIsPBM(image))
     {
         if(image->body != NULL)
@@ -137,9 +137,9 @@ int SDL_ILBM_renderCorrectedRGBImage(const ILBM_Image *image, amiVideo_Screen *s
         if(image->bitplanes != NULL)
             amiVideo_convertScreenBitplanesToCorrectedRGBPixels(screen); /* Convert the bitplanes to corrected RGB pixels */
     }
-    
+
     if(SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-    
+
     return TRUE;
 }

@@ -61,7 +61,7 @@ static void shiftDRange(amiVideo_Palette *palette, const ILBM_DRange *drange)
     amiVideo_Color temp = color[drange->dindex[drange->min].index];
 
     for(i = drange->min; i < drange->max; i++)
-	color[drange->dindex[i].index] = color[drange->dindex[i + 1].index];
+        color[drange->dindex[i].index] = color[drange->dindex[i + 1].index];
 
     color[drange->dindex[drange->max].index] = temp;
 }
@@ -69,28 +69,28 @@ static void shiftDRange(amiVideo_Palette *palette, const ILBM_DRange *drange)
 static void shiftCycleInfo(amiVideo_Palette *palette, const ILBM_CycleInfo *cycleInfo)
 {
     amiVideo_Color *color = palette->bitplaneFormat.color;
-    
+
     if(cycleInfo->direction == ILBM_CYCLEINFO_SHIFT_LEFT)
     {
-	/* Shift left */
-	unsigned int i;
-	amiVideo_Color temp = color[cycleInfo->end];
-	
-	for(i = cycleInfo->end; i > cycleInfo->start; i--)
-	    color[i] = color[i - 1];
-	
-	color[cycleInfo->start] = temp;
+        /* Shift left */
+        unsigned int i;
+        amiVideo_Color temp = color[cycleInfo->end];
+
+        for(i = cycleInfo->end; i > cycleInfo->start; i--)
+            color[i] = color[i - 1];
+
+        color[cycleInfo->start] = temp;
     }
     else if(cycleInfo->direction == ILBM_CYCLEINFO_SHIFT_RIGHT)
     {
-	/* Shift right */
-	unsigned int i;
-	amiVideo_Color temp = color[cycleInfo->start];
-	
-	for(i = cycleInfo->start; i < cycleInfo->end; i++)
-	    color[i] = color[i + 1];
-	
-	color[cycleInfo->end] = temp;
+        /* Shift right */
+        unsigned int i;
+        amiVideo_Color temp = color[cycleInfo->start];
+
+        for(i = cycleInfo->start; i < cycleInfo->end; i++)
+            color[i] = color[i + 1];
+
+        color[cycleInfo->end] = temp;
     }
 }
 
@@ -113,19 +113,19 @@ void SDL_ILBM_initRangeTimes(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Image *
 {
     unsigned int i;
     Uint32 ticks;
-    
+
     rangeTimes->crngTimes = (Uint32*)malloc(image->colorRangeLength * sizeof(Uint32));
     rangeTimes->drngTimes = (Uint32*)malloc(image->drangeLength * sizeof(Uint32));
     rangeTimes->ccrtTimes = (Uint32*)malloc(image->cycleInfoLength * sizeof(Uint32));
-    
+
     ticks = SDL_GetTicks();
-    
+
     for(i = 0; i < image->colorRangeLength; i++)
         rangeTimes->crngTimes[i] = computeColorRangeTime(ticks, image->colorRange[i]);
-    
+
     for(i = 0; i < image->drangeLength; i++)
         rangeTimes->drngTimes[i] = computeDRangeTime(ticks, image->drange[i]);
-    
+
     for(i = 0; i < image->cycleInfoLength; i++)
         rangeTimes->ccrtTimes[i] = computeCycleInfoTime(ticks, image->cycleInfo[i]);
 }
@@ -144,37 +144,37 @@ void SDL_ILBM_shiftActiveRanges(SDL_ILBM_RangeTimes *rangeTimes, const ILBM_Imag
     Uint32 *drngTimes = rangeTimes->drngTimes;
     Uint32 *ccrtTimes = rangeTimes->ccrtTimes;
     Uint32 ticks = SDL_GetTicks();
-    
+
     for(i = 0; i < image->colorRangeLength; i++)
     {
-	ILBM_ColorRange *colorRange = image->colorRange[i];
-	
-	if(colorRange->active != 0 && ticks >= crngTimes[i])
-	{
-	    shiftColorRange(palette, colorRange, colorRange->active & ILBM_COLORRANGE_SHIFT_RIGHT);
-	    crngTimes[i] = computeColorRangeTime(ticks, colorRange); /* Update time */
-	}
+        ILBM_ColorRange *colorRange = image->colorRange[i];
+
+        if(colorRange->active != 0 && ticks >= crngTimes[i])
+        {
+            shiftColorRange(palette, colorRange, colorRange->active & ILBM_COLORRANGE_SHIFT_RIGHT);
+            crngTimes[i] = computeColorRangeTime(ticks, colorRange); /* Update time */
+        }
     }
 
     for(i = 0; i < image->drangeLength; i++)
     {
-	ILBM_DRange *drange = image->drange[i];
-	
-	if((drange->flags & ILBM_RNG_ACTIVE) == ILBM_RNG_ACTIVE && ticks >= drngTimes[i])
-	{
-	    shiftDRange(palette, drange);
-	    drngTimes[i] = computeDRangeTime(ticks, drange); /* Update time */
-	}
+        ILBM_DRange *drange = image->drange[i];
+
+        if((drange->flags & ILBM_RNG_ACTIVE) == ILBM_RNG_ACTIVE && ticks >= drngTimes[i])
+        {
+            shiftDRange(palette, drange);
+            drngTimes[i] = computeDRangeTime(ticks, drange); /* Update time */
+        }
     }
-    
+
     for(i = 0; i < image->cycleInfoLength; i++)
     {
-	ILBM_CycleInfo *cycleInfo = image->cycleInfo[i];
-	
-	if(cycleInfo->direction != 0 && ticks >= ccrtTimes[i])
-	{
-	    shiftCycleInfo(palette, cycleInfo);
-	    ccrtTimes[i] = computeCycleInfoTime(ticks, cycleInfo); /* Update time */
-	}
+        ILBM_CycleInfo *cycleInfo = image->cycleInfo[i];
+
+        if(cycleInfo->direction != 0 && ticks >= ccrtTimes[i])
+        {
+            shiftCycleInfo(palette, cycleInfo);
+            ccrtTimes[i] = computeCycleInfoTime(ticks, cycleInfo); /* Update time */
+        }
     }
 }

@@ -23,9 +23,11 @@ Installation on Unix-like systems
 Compilation and installation of this library on Unix-like systems is straight
 forward, by using the standard GNU autotools build instructions:
 
-    $ ./configure
-    $ make
-    $ make install
+```bash
+$ ./configure
+$ make
+$ make install
+```
 
 More details about the installation process can be found in the `INSTALL` file
 included in this package.
@@ -36,7 +38,9 @@ This package can also be built with Visual C++ for Windows platforms. The
 solution file resides in `src/SDL_ILBM.sln` that can be opened in Visual Studio
 to edit or build it. Alternatively, you can also use `MSBuild` to compile it:
 
-    $ MSBuild SDL_ILBM.sln
+```
+$ MSBuild SDL_ILBM.sln
+```
 
 To make any builds work, you must have a build for `libiff`, `libilbm`,
 `libamivideo` and `SDL 2.0` first. By default, the project file looks for these
@@ -46,7 +50,9 @@ You can also specify their locations through property parameters. For example,
 the following instructions specifies where `libiff` includes and libraries can
 be found:
 
-    $ MSBuild /p:libiffIncludePath:..\..\..\libiff\src /p:libiffLibPath:..\..\..\libiff\src\Debug libilbm.sln
+```
+$ MSBuild /p:libiffIncludePath:..\..\..\libiff\src /p:libiffLibPath:..\..\..\libiff\src\Debug libilbm.sln
+```
 
 The following property parameters can be used:
 
@@ -80,7 +86,7 @@ SDL_ILBM_Set *set = SDL_ILBM_createSetFromFilename("somefile.IFF");
 if(set != NULL && set->imagesLength > 0)
 {
     /* Open an image */
-    
+
     return 0;
 }
 else
@@ -384,7 +390,9 @@ ILBM viewer command-line utility
 This package also includes a command-line utility `ilbmviewer` that exposes most
 of the API's features as command-line options. For more information, run:
 
-    $ ilbmviewer --help
+```bash
+$ ilbmviewer --help
+```
 
 License
 =======
