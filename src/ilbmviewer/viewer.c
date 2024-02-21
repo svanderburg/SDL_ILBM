@@ -188,12 +188,7 @@ static SDL_ILBM_Status viewILBMImage(SDL_ILBM_Set *set, const unsigned int numbe
 int SDL_ILBM_viewILBMImages(const char *filename, const SDL_ILBM_Format format, unsigned int number, const unsigned int lowresPixelScaleFactor, const unsigned int options)
 {
     SDL_ILBM_Status status = SDL_ILBM_STATUS_NONE;
-    SDL_ILBM_Set *set;
-
-    if(filename == NULL)
-        set = SDL_ILBM_createSetFromFd(stdin);
-    else
-        set = SDL_ILBM_createSetFromFilename(filename);
+    SDL_ILBM_Set *set = SDL_ILBM_createSet(filename);
 
     if(set == NULL)
     {

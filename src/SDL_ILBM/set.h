@@ -55,15 +55,6 @@ struct SDL_ILBM_Set
 };
 
 /**
- * Initializes a preallocated set by opening a file with a specified filename.
- *
- * @param set A preallocated set
- * @param filename Path to an IFF file to open
- * @return TRUE if the initialization succeeded, else FALSE
- */
-IFF_Bool SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
-
-/**
  * Initializes a preallocated set by opening a file with a specific file
  * descriptor.
  *
@@ -74,21 +65,33 @@ IFF_Bool SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
 IFF_Bool SDL_ILBM_initSetFromFd(SDL_ILBM_Set *set, FILE *file);
 
 /**
+ * Initializes a preallocated set by opening a file with a specified filename.
+ *
+ * @param set A preallocated set
+ * @param filename Path to an IFF file to open
+ * @return TRUE if the initialization succeeded, else FALSE
+ */
+IFF_Bool SDL_ILBM_initSetFromFilename(SDL_ILBM_Set *set, const char *filename);
+
+/**
+ * Initializes a preallocated set by opening a file with a specified filename
+ * or reading it from the standard input if no filename was provided.
+ *
+ * @param set A preallocated set
+ * @param filename Path to an IFF file to open or NULL to read from the standard input
+ * @return TRUE if the initialization succeeded, else FALSE
+ */
+IFF_Bool SDL_ILBM_initSet(SDL_ILBM_Set *set, const char *filename);
+
+/**
  * Initializes a preallocated set by parsing an IFF chunk.
  *
  * @param set A preallocated set
  * @param chunk IFF chunk originating from a parsed file
  * @param mustFreeChunk Indicates whether the provided chunk must be freed from memory while freeing the set
+ * @return TRUE if the set was successfully generated, else FALSE
  */
-int SDL_ILBM_initSetFromIFFChunk(SDL_ILBM_Set *set, IFF_Chunk *chunk, int mustFreeChunk);
-
-/**
- * Creates a set by opening a file with a specified filename.
- *
- * @param filename Path to an IFF file to open
- * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
- */
-SDL_ILBM_Set *SDL_ILBM_createSetFromFilename(const char *filename);
+IFF_Bool SDL_ILBM_initSetFromIFFChunk(SDL_ILBM_Set *set, IFF_Chunk *chunk, IFF_Bool mustFreeChunk);
 
 /**
  * Creates a set by opening a file with a specific file descriptor.
@@ -99,13 +102,29 @@ SDL_ILBM_Set *SDL_ILBM_createSetFromFilename(const char *filename);
 SDL_ILBM_Set *SDL_ILBM_createSetFromFd(FILE *file);
 
 /**
+ * Creates a set by opening a file with a specified filename.
+ *
+ * @param filename Path to an IFF file to open
+ * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
+ */
+SDL_ILBM_Set *SDL_ILBM_createSetFromFilename(const char *filename);
+
+/**
+ * Creates a set by opening a file with a specified filename or reading it from the standard input when no filename was provided.
+ *
+ * @param filename Path to an IFF file to open or NULL to read from the standard input
+ * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
+ */
+SDL_ILBM_Set *SDL_ILBM_createSet(const char *filename);
+
+/**
  * Creates a set by parsing an IFF chunk.
  *
  * @param chunk IFF chunk originating from a parsed file
  * @param mustFreeChunk Indicates whether the provided chunk must be freed from memory while freeing the set
  * @return An SDL_ILBM_Set instance or NULL in case of an error. The resulting set must be freed with SDL_ILBM_freeSet()
  */
-SDL_ILBM_Set *SDL_ILBM_createSetFromIFFChunk(IFF_Chunk *chunk, int mustFreeChunk);
+SDL_ILBM_Set *SDL_ILBM_createSetFromIFFChunk(IFF_Chunk *chunk, IFF_Bool mustFreeChunk);
 
 /**
  * Creates an SDL_Surface from an image in the set.
